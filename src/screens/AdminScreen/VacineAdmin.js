@@ -15,45 +15,60 @@ export default function VacineAdmin() {
       <View
         style={{
           position: "relative",
-          
         }}
       >
         <View
           style={{
             height: 180,
             backgroundColor: "#4865F3",
-            flexDirection: "row",
-            alignItems: "center",
             padding: "5%",
-            position: "relative",
             zIndex: 1,
             borderBottomLeftRadius: "10%",
-            borderBottomRightRadius: "10%"
+            borderBottomRightRadius: "10%",
           }}
         >
-          <View style={{ width: "25%", marginBottom: "10%" }}>
-            <Text style={styles.dash}>Vaccine</Text>
-          </View>
-          
+          <View
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginTop: "10%",
+              marginBottom: "2%",
+            }}
+          >
+            <View style={{ width: "25%" }}>
+              <Text style={styles.dash}>Vaccine</Text>
+            </View>
+
             <View
               style={{
                 width: 35,
                 height: 35,
                 borderRadius: 25,
                 backgroundColor: "#D1D5DB",
-                marginBottom: "15%",
-                marginLeft:'64%'
               }}
             />
-            
           </View>
-        
+
+          <View
+            style={{
+              backgroundColor: "white",
+              height: 40,
+              borderRadius: 15,
+              alignSelf: "center",
+              width: "100%",
+              zIndex: 2,
+            }}
+          ></View>
+        </View>
 
         {/* */}
+
         <View
           style={{
             backgroundColor: "white",
-            height: 150,
+            height: 600,
             marginHorizontal: 15,
             borderRadius: 10,
             left: 0,
@@ -62,43 +77,84 @@ export default function VacineAdmin() {
             width: "90%",
             zIndex: 2,
             elevation: 2,
+            position: "fixed",
+            top: " -5%",
           }}
         >
-          <Text style={{textAlign: 'center', fontSize: 12, margin: 8}}>Total vaccine recipients</Text>
-          <Text style={{fontSize: 20, textAlign: 'center',color: '#0A56DF', fontWeight: 700}}>11,429</Text>
           <View
             style={{
-              backgroundColor: 'black',
-              height: 1,
+              backgroundColor: "white",
+              height: 130,
+              borderRadius: 15,
+              alignSelf: "center",
               width: "95%",
-              margin: 10
+              zIndex: 2,
+              margin: 5,
+              elevation: 2,
             }}
-          />
-          <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', margin: '10'}}>
-            <View>
-              <Text style={{fontSize: 16, textAlign: 'center', fontWeight: 700}}>20</Text>
-              <Text style={{textAlign: 'center', fontSize: 12, margin: 0}}>Vaccine</Text>
-            </View>
-            <View>
-              <Text style={{fontSize: 16, textAlign: 'center', fontWeight: 700}}>20</Text>
-              <Text style={{textAlign: 'center', fontSize: 12, margin: 0}}>Vaccine</Text>
-            </View>
-            <View>
-              <Text style={{fontSize: 16, textAlign: 'center', fontWeight: 700}}>20</Text>
-              <Text style={{textAlign: 'center', fontSize: 12, margin: 0}}>Vaccine</Text>
-            </View>
-            <View>
-              <Text style={{fontSize: 16, textAlign: 'center', fontWeight: 700}}>20</Text>
-              <Text style={{textAlign: 'center', fontSize: 12, margin: 0}}>Vaccine</Text>
+          >
+            <Text style={{ fontSize: 18, marginLeft: 10, marginTop: '10', fontWeight: '300' }}>
+            COvid Cine
+            </Text>
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: 200,
+                marginLeft: 10,
+                opacity: 0.5
+              }}
+            >
+              #575447
+            </Text>
+            <View
+              style={{
+                backgroundColor: "black",
+                height: 1,
+                width: "95%",
+                margin: 10,
+              }}
+            />
+            <View
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-between",
+                margin: "10",
+              }}
+            >
+              <View>
+                <Text
+                  style={{ fontSize: 16, textAlign: "center", fontWeight: 700 }}
+                >
+                  8,776
+                </Text>
+                <Text style={{ textAlign: "center", fontSize: 12, margin: 0 }}>
+                Total vaccine
+                </Text>
+              </View>
+              <View>
+                <Text
+                  style={{ fontSize: 16, textAlign: "center", fontWeight: 700 }}
+                >
+                  5,776
+                </Text>
+                <Text style={{ textAlign: "center", fontSize: 12, margin: 0 }}>
+                Total used
+                </Text>
+              </View>
+              <View>
+                <Text
+                  style={{ fontSize: 16, textAlign: "center", fontWeight: 700 }}
+                >
+                  3,000
+                </Text>
+                <Text style={{ textAlign: "center", fontSize: 12, margin: 0 }}>
+                Total storage
+                </Text>
+              </View>
             </View>
           </View>
         </View>
-
-        
-
-       
-
-       
       </View>
     </ScrollView>
   );
@@ -122,7 +178,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9f9f9",
   },
   dash: {
-    color: 'white'
+    color: "white",
   },
   header: {
     backgroundColor: "#3B82F6",

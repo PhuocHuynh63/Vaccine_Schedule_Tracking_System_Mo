@@ -24,11 +24,6 @@ const StackNavigation = () => {
     return (
         <Stack.Navigator>
             <Stack.Screen
-                name={ROUTES.ADMIN_PAGE}
-                component={BottomTabNavigatorAdmin}
-                options={{ headerShown: false }}
-            />
-            <Stack.Screen
                 name={ROUTES.CHOOSE_AUTHEN}
                 component={ChooseAuthenScreen}
                 options={{ headerShown: false }}
@@ -36,6 +31,11 @@ const StackNavigation = () => {
             <Stack.Screen
                 name={ROUTES.HOME_PAGE}
                 component={BottomTabNavigator}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name={ROUTES.ADMIN_PAGE}
+                component={BottomTabNavigatorAdmin}
                 options={{ headerShown: false }}
             />
             <Stack.Screen
