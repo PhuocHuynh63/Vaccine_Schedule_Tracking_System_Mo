@@ -8,6 +8,7 @@ type RootStackParamList = {
     [ROUTES.REGISTER_ACCOUNT]: { email: string };
     [ROUTES.FORGOTPASSWORD]: undefined;
     [ROUTES.OTP]: { email: string };
+    [ROUTES.HOME_PAGE]: undefined;
     [ROUTES.LIST_VACCINATOR_PROFILE]: undefined;
     [ROUTES.SELECT_FROM_CART]: { userId: string };
     [ROUTES.ADD_NEW_VACCINE]: { userId: string };

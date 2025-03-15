@@ -16,6 +16,7 @@ import ForgotPasswordScreen from '@screens/Auth/ForgotPassword';
 import OTPScreen from '@screens/Auth/OTP';
 import SelectFromCart from '@screens/SelectFromCart'
 import BottomTabNavigator from './bottomTab.navigation';
+import BottomTabNavigatorAdmin from '@screens/AdminScreen/bottomTabAdmin';
 
 const Stack = createStackNavigator();
 
@@ -41,6 +42,11 @@ const StackNavigation = () => {
             <Stack.Screen
                 name={ROUTES.HOME_PAGE}
                 component={BottomTabNavigator}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name={ROUTES.ADMIN_PAGE}
+                component={BottomTabNavigatorAdmin}
                 options={{ headerShown: false }}
             />
             <Stack.Screen

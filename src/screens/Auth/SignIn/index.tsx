@@ -35,8 +35,9 @@ const SignInScreen = () => {
     const isEmailExist = await UserService.isEmailExists(data.email)
     if (isEmailExist) {
       navigation.navigate(ROUTES.PASSWORD, { email: data.email })
+    } else {
+      navigation.navigate(ROUTES.REGISTER_ACCOUNT, { email: data.email })
     }
-    navigation.navigate(ROUTES.REGISTER_ACCOUNT, { email: data.email })
     reset()
   }
   //#endregion
