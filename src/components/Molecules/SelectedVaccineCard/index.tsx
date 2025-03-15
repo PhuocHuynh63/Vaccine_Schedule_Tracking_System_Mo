@@ -18,8 +18,7 @@ const SelectedVaccineCard: React.FC<SelectedVaccineCardProps> = ({
   onDelete,
   imageSource
 }) => {
-  // Fallback image if none provided
-  const defaultImage = require('@assets/images/vacxin-qdenga.jpg');
+  const defaultImage = require('../../../../assets/vacxin-qdenga.jpg');
   
   return (
     <View style={styles.container}>
@@ -32,7 +31,9 @@ const SelectedVaccineCard: React.FC<SelectedVaccineCardProps> = ({
           />
           
           <View style={styles.infoContainer}>
-            <Text style={styles.vaccineName}>{vaccineName}</Text>
+            <Text style={styles.vaccineName} numberOfLines={2} ellipsizeMode="tail">
+              {vaccineName}
+            </Text>
             <View style={styles.typeContainer}>
               <Text style={styles.label}>Phòng bệnh: </Text>
               <Text style={styles.type}>{vaccineType}</Text>
@@ -43,7 +44,7 @@ const SelectedVaccineCard: React.FC<SelectedVaccineCardProps> = ({
         <View style={styles.bottomContainer}>
           <Text style={styles.price}>{price.toLocaleString()} VNĐ</Text>
           <TouchableOpacity onPress={onDelete} style={styles.deleteButton}>
-            <Ionicons name="trash" size={24} color={style.colors.red.bg} />
+            <Ionicons name="trash" size={20} color={style.colors.red.bg} />
           </TouchableOpacity>
         </View>
       </View>
@@ -53,26 +54,31 @@ const SelectedVaccineCard: React.FC<SelectedVaccineCardProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: style.sizes.padding.p_14,
-    paddingVertical: style.sizes.padding.p_10,
+    marginHorizontal: style.sizes.margin.m_12, // Điều chỉnh margin để vừa với khung
+    marginVertical: style.sizes.margin.m_8,
   },
   card: {
     borderWidth: 1,
     borderColor: style.colors.grey.line,
     borderRadius: style.sizes.borderRadius.br_5,
     backgroundColor: 'white',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   contentContainer: {
     flexDirection: 'row',
-    padding: style.sizes.padding.p_14,
+    padding: style.sizes.padding.p_10, // Giảm padding để nhỏ gọn hơn
     borderBottomWidth: 1,
     borderBottomColor: style.colors.grey.line,
     alignItems: 'center',
   },
   image: {
-    width: 60,
-    height: 60,
-    marginRight: style.sizes.margin.m_12,
+    width: 50, // Giảm kích thước hình ảnh để vừa khung
+    height: 50,
+    marginRight: style.sizes.margin.m_8,
     backgroundColor: '#f5f5f5',
   },
   infoContainer: {
@@ -81,7 +87,8 @@ const styles = StyleSheet.create({
   vaccineName: {
     fontSize: style.fonts.size.medium,
     fontWeight: '600',
-    marginBottom: style.sizes.margin.m_16,
+    marginBottom: style.sizes.margin.m_8,
+    color: '#333',
   },
   typeContainer: {
     flexDirection: 'row',
@@ -99,8 +106,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: style.sizes.padding.p_10,
-    paddingHorizontal: style.sizes.padding.p_14,
+    paddingVertical: style.sizes.padding.p_8,
+    paddingHorizontal: style.sizes.padding.p_10,
     backgroundColor: style.colors.grey.bgLight,
   },
   price: {

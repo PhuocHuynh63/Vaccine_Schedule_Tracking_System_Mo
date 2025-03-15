@@ -1,43 +1,91 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { style } from '@themes/index';
-import { IComponents } from 'src/types/IComponents';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Vaccine from '@atoms/Vaccine';
 
 interface VaccineCardProps {
-  onPress: () => void;
+  onPress: (id: string, isSelected: boolean) => void; // Cập nhật để truyền cả trạng thái
   isSelected: boolean;
+  vaccineId: string;
 }
 
-const VaccineCard = ({ onPress, isSelected }: VaccineCardProps) => {
+const VaccineCard = ({ onPress, isSelected, vaccineId }: VaccineCardProps) => {
+  const [vaccine, setVaccine] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchVaccine = async () => {
+      try {
+        const cachedData = await AsyncStorage.getItem(`vaccine_${vaccineId}`);
+        if (cachedData) {
+          setVaccine(JSON.parse(cachedData));
+        } else {
+          const response = await fetch(`https://666a8f987013419182cfc970.mockapi.io/api/vaccines/${vaccineId}`);
+          const data = await response.json();
+          setVaccine(data);
+          await AsyncStorage.setItem(`vaccine_${vaccineId}`, JSON.stringify(data));
+        }
+      } catch (error) {
+        console.error('Error fetching vaccine:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVaccine();
+  }, [vaccineId]);
+
+  const handlePress = async () => {
+    const newSelectedState = !isSelected;
+    onPress(vaccineId, newSelectedState); // Gọi hàm callback với trạng thái mới
+
+    // Lưu trạng thái lựa chọn vào AsyncStorage
+    try {
+      const selectedVaccines = await AsyncStorage.getItem('selectedVaccines');
+      let selectedArray = selectedVaccines ? JSON.parse(selectedVaccines) : [];
+
+      if (newSelectedState) {
+        // Thêm vaccineId vào mảng nếu được chọn
+        if (!selectedArray.includes(vaccineId)) {
+          selectedArray.push(vaccineId);
+        }
+      } else {
+        // Xóa vaccineId khỏi mảng nếu bỏ chọn
+        selectedArray = selectedArray.filter((id: string) => id !== vaccineId);
+      }
+
+      await AsyncStorage.setItem('selectedVaccines', JSON.stringify(selectedArray));
+    } catch (error) {
+      console.error('Error saving selected vaccines:', error);
+    }
+  };
+
+  if (loading) {
+    return <ActivityIndicator size="large" color="#0056b3" />;
+  }
+
+  if (!vaccine) {
+    return <Text style={styles.errorText}>Error loading vaccine data</Text>;
+  }
+
   return (
     <View style={styles.card}>
       <View style={styles.infoContainer}>
-        {/* Ảnh vaccine */}
         <Vaccine />
-
-        {/* Thông tin */}
         <View style={styles.textContainer}>
-          <Text style={styles.name}>VẮC XIN SHINGRIX PHÒNG BỆNH ZONA THẦN KINH</Text>
+          <Text style={styles.name}>{vaccine.name}</Text>
           <Text style={styles.description}>
             <Text style={styles.bold}>Disease prevention: </Text>
-            Zona thần kinh
+            {vaccine.diseasePrevention}
           </Text>
-          <Text style={styles.price}>3,890,000 VNĐ</Text>
+          <Text style={styles.price}>{vaccine.price} VNĐ</Text>
         </View>
       </View>
-
-      {/* Nút chọn */}
-      <TouchableOpacity 
-        style={[
-          styles.button, 
-          isSelected ? styles.selectedButton : styles.chooseButton
-        ]} 
-        onPress={onPress}
+      <TouchableOpacity
+        style={[styles.button, isSelected ? styles.selectedButton : styles.chooseButton]}
+        onPress={handlePress}
       >
-        <Text style={styles.buttonText}>
-          {isSelected ? 'Selected' : 'Choose'}
-        </Text>
+        <Text style={styles.buttonText}>{isSelected ? 'Selected' : 'Choose'}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -95,11 +143,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#0056b3',
   },
   selectedButton: {
-    backgroundColor: '#34A853', // Green color for selected state
+    backgroundColor: '#34A853',
   },
   buttonText: {
     color: 'white',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    marginTop: 10,
   },
 });
