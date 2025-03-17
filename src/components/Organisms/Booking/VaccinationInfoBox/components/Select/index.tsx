@@ -1,13 +1,13 @@
-import { StyleSheet } from 'react-native'
+import { StyleSheet, TouchableOpacity } from 'react-native'
 import React from 'react'
 import { Button } from '@atoms/Button'
 import { style } from '@themes/index'
 
-const SelectVaccinationSite = ({ children }: { children: React.ReactNode }) => {
+const SelectVaccinationSite = ({ children, onPress  }: { children: React.ReactNode; onPress?: () => void; }) => {
     return (
-        <Button style={styles.container}>
+        <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.7}>
             {children}
-        </Button>
+        </TouchableOpacity>
     )
 }
 

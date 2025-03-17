@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { Animated, StyleSheet, Text, TouchableOpacity, View, FlatList } from 'react-native';
+import { Animated, StyleSheet, Text, TouchableOpacity, View, FlatList, Modal } from 'react-native';
 import { style } from '@themes/index';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Entypo from '@expo/vector-icons/Entypo';
@@ -16,11 +16,10 @@ import { RootStackParamList } from 'src/types/INavigates';
 import { ROUTES } from '@routes/index';
 import { Button } from '@atoms/Button';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import CalendarPicker from 'react-native-calendar-picker'; // Import the new calendar picker
+import CalendarPicker from 'react-native-calendar-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SelectedVaccineCard from '@molecules/SelectedVaccineCard';
 
-// Remove the CalendarDay interface since CalendarPicker uses a different date format
 const VaccinationInfoBox = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<RootStackParamList, ROUTES.VACCINATOR_PROFILE>>();
@@ -32,6 +31,10 @@ const VaccinationInfoBox = () => {
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedVaccines, setSelectedVaccines] = useState<any[]>([]);
+  const [calendarModalVisible, setCalendarModalVisible] = useState(false);
+
+  // Calculate total price from selected vaccines
+  const totalPrice = selectedVaccines.reduce((sum, vaccine) => sum + (vaccine.price || 0), 0);
 
   useEffect(() => {
     Animated.timing(heightAnim, {
@@ -78,8 +81,25 @@ const VaccinationInfoBox = () => {
 
   const onDateChange = useCallback((date: Date) => {
     setSelectedDate(date);
-    setShowCalendar(false); // Close the calendar after selection
+    setCalendarModalVisible(false);
   }, []);
+
+  // Inside VaccinationInfoBox component
+  const handleConfirmPayment = () => {
+    // Navigate to Cart page with relevant data
+    navigation.navigate(ROUTES.CART, {
+      userId: user,
+      selectedVaccines: selectedVaccines,
+      totalPrice: totalPrice,
+      userInfo: {
+        fullName: "NGUYỄN MINH HOÀNG",
+        dateOfBirth: "05/10/2004",
+        phone: "0859849026",
+        vaccinationCenter: "VNVC Bà Thắng Hải-Thành Phố Hồ Chí Minh",
+        expectedDate: selectedDate ? selectedDate.toLocaleDateString() : "08/05/2025",
+      },
+    });
+  };
 
   return (
     <View style={styles.container}>
@@ -163,35 +183,64 @@ const VaccinationInfoBox = () => {
               Select vaccination date{' '}
               <Text style={[styles.vaccineInfo, { color: style.colors.red.bg, fontWeight: 'bold' }]}>*</Text>
             </Text>
-            <TouchableOpacity onPress={() => setShowCalendar(!showCalendar)}>
-              <SelectVaccinationSite>
-                <Text style={styles.textSelect}>
-                  {selectedDate ? selectedDate.toLocaleDateString() : 'Select Date'}
-                </Text>
-                <FontAwesome name="calendar" size={18} color="black" />
-              </SelectVaccinationSite>
-            </TouchableOpacity>
+            <SelectVaccinationSite onPress={() => setCalendarModalVisible(true)}>
+              <Text style={styles.textSelect}>
+                {selectedDate ? selectedDate.toLocaleDateString() : 'Select Date'}
+              </Text>
+              <FontAwesome name="calendar" size={18} color="black" />
+            </SelectVaccinationSite>
 
-            {showCalendar && (
-              <View style={styles.calendarContainer}>
-                <CalendarPicker
-                  onDateChange={onDateChange}
-                  selectedDayColor={style.colors.blue.bg}
-                  selectedDayTextColor="#FFFFFF"
-                  todayBackgroundColor={style.colors.red.bg}
-                  todayTextStyle={{ color: '#FFFFFF' }}
-                  minDate={new Date(2024, 0, 1)} // January 1, 2024
-                  maxDate={new Date(2026, 11, 31)} // December 31, 2026
-                  previousComponent={<FontAwesome name="chevron-left" size={18} color={style.colors.blue.bg} />}
-                  nextComponent={<FontAwesome name="chevron-right" size={18} color={style.colors.blue.bg} />}
-                  textStyle={{
-                    fontSize: 16,
-                    color: '#000000',
-                  }}
-                  selectedStartDate={selectedDate} // Highlight the selected date
-                />
+            {/* Modal Calendar thay thế cho calendar thông thường */}
+            <Modal
+              transparent={true}
+              visible={calendarModalVisible}
+              animationType="fade"
+              onRequestClose={() => setCalendarModalVisible(false)}
+            >
+              <View style={styles.modalOverlay}>
+                <View style={styles.modalContainer}>
+                  <View style={styles.modalHeader}>
+                    <Text style={styles.modalTitle}>Select Vaccination Date</Text>
+                    <TouchableOpacity onPress={() => setCalendarModalVisible(false)}>
+                      <FontAwesome name="close" size={24} color={style.colors.blue.bg} />
+                    </TouchableOpacity>
+                  </View>
+                  <CalendarPicker
+                    onDateChange={onDateChange}
+                    selectedDayColor={style.colors.blue.bg}
+                    selectedDayTextColor="#FFFFFF"
+                    todayBackgroundColor={style.colors.red.bg}
+                    todayTextStyle={{ color: '#FFFFFF' }}
+                    minDate={new Date(2024, 0, 1)} // January 1, 2024
+                    maxDate={new Date(2026, 11, 31)} // December 31, 2026
+                    previousComponent={<FontAwesome name="chevron-left" size={18} color={style.colors.blue.bg} />}
+                    nextComponent={<FontAwesome name="chevron-right" size={18} color={style.colors.blue.bg} />}
+                    textStyle={{
+                      fontSize: 16,
+                      color: '#000000',
+                    }}
+                    selectedStartDate={selectedDate} // Highlight the selected date
+                    width={300} // Đảm bảo calendar hiển thị đủ rộng
+                  />
+                  <View style={styles.modalFooter}>
+                    <TouchableOpacity
+                      style={styles.modalButton}
+                      onPress={() => setCalendarModalVisible(false)}
+                    >
+                      <Text style={styles.modalButtonText}>Cancel</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.modalButton, styles.modalButtonConfirm]}
+                      onPress={() => {
+                        if (selectedDate) setCalendarModalVisible(false);
+                      }}
+                    >
+                      <Text style={styles.modalButtonConfirmText}>Confirm</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
               </View>
-            )}
+            </Modal>
           </View>
 
           <View>
@@ -217,6 +266,9 @@ const VaccinationInfoBox = () => {
                   />
                 )}
                 contentContainerStyle={{ paddingVertical: 10 }}
+                style={{ maxHeight: 200 }}  // Thêm chiều cao tối đa
+                showsVerticalScrollIndicator={true}  // Hiển thị thanh cuộn dọc
+                nestedScrollEnabled={true}  // Cho phép cuộn lồng nhau
               />
             )}
           </View>
@@ -241,6 +293,23 @@ const VaccinationInfoBox = () => {
           <View style={[flexBoxStyles.centerColumn]}>
             <Feather name="chevrons-up" size={24} color="black" />
           </View>
+        </View>
+      </View>
+
+      {/* Payment summary card - added as requested */}
+      <View style={styles.paymentSummaryContainer}>
+        <View style={styles.paymentSummaryContent}>
+          <View style={styles.totalPriceContainer}>
+            <Text style={styles.totalPriceLabel}>Total</Text>
+            <Text style={styles.totalPriceValue}>{totalPrice.toLocaleString()} VNĐ</Text>
+          </View>
+          <TouchableOpacity
+            style={styles.confirmButton}
+            onPress={handleConfirmPayment}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.confirmButtonText}>Confirm</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </View>
@@ -335,16 +404,117 @@ const styles = StyleSheet.create({
     marginHorizontal: 0,
     borderRadius: style.sizes.borderRadius.br_13,
   },
-  calendarContainer: {
-    marginTop: 10,
-    zIndex: 1,
-    padding: 10,
+  // Modal Calendar CSS
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  modalContainer: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    elevation: 2,
+    borderRadius: style.sizes.borderRadius.br_13,
+    padding: style.sizes.padding.p_20,
+    width: '90%',
+    maxWidth: 350,
+    elevation: 5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    zIndex: 1001,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: style.sizes.margin.m_16,
+    paddingBottom: style.sizes.padding.p_10,
+    borderBottomWidth: 1,
+    borderBottomColor: style.colors.grey.line,
+  },
+  modalTitle: {
+    fontSize: style.fonts.size.xlarge,
+    fontWeight: '600',
+    color: style.colors.blue.bg,
+  },
+  modalFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: style.sizes.margin.m_16,
+    paddingTop: style.sizes.padding.p_10,
+    borderTopWidth: 1,
+    borderTopColor: style.colors.grey.line,
+  },
+  modalButton: {
+    paddingVertical: style.sizes.padding.p_10,
+    paddingHorizontal: style.sizes.padding.p_20,
+    borderRadius: style.sizes.borderRadius.br_5,
+    backgroundColor: style.colors.grey.bgLight,
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    fontSize: style.fonts.size.medium,
+    fontWeight: '600',
+    color: style.colors.grey.bg,
+  },
+  modalButtonConfirm: {
+    backgroundColor: style.colors.blue.bg,
+  },
+  modalButtonConfirmText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+  },
+
+  // Payment Summary styles - new styles added for the payment summary section
+  paymentSummaryContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: style.colors.grey.line,
+    paddingVertical: 15,
+    paddingHorizontal: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: 3,
+    elevation: 5,
+  },
+  paymentSummaryContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  totalPriceContainer: {
+    flex: 1,
+  },
+  totalPriceLabel: {
+    fontSize: style.fonts.size.medium,
+    color: style.colors.grey.bg,
+    marginBottom: 4,
+  },
+  totalPriceValue: {
+    fontSize: style.fonts.size.xlarge,
+    fontWeight: '700',
+    color: '#000',
+  },
+  confirmButton: {
+    backgroundColor: style.colors.blue.bg,
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: style.sizes.borderRadius.br_5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minWidth: 120,
+  },
+  confirmButtonText: {
+    color: '#FFFFFF',
+    fontSize: style.fonts.size.large,
+    fontWeight: '600',
   },
 });

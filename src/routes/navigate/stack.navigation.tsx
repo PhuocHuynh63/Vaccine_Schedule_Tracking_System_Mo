@@ -12,6 +12,7 @@ import ChooseAuthenScreen from '@screens/Auth/ChooseAuthen';
 import SignInScreen from '@screens/Auth/SignIn';
 import PasswordScreen from '@screens/Auth/Password';
 import AddNewVaccine from '@screens/AddNewVaccine';
+import CartPage from '@screens/Cart';
 import ForgotPasswordScreen from '@screens/Auth/ForgotPassword';
 import OTPScreen from '@screens/Auth/OTP';
 import SelectFromCart from '@screens/SelectFromCart'
@@ -121,6 +122,17 @@ const StackNavigation = () => {
                     header: () =>
                         <HeaderBooking
                             children={'Add new vaccine'}
+                            icon={<AntDesign name="edit" style={iconStyles.icon} />}
+                        />
+                }}
+            />
+            <Stack.Screen
+                name={ROUTES.CART}
+                component={CartPage}
+                options={{
+                    header: () =>
+                        <HeaderBooking
+                            children={'Confirm Order'}
                             icon={<AntDesign name="edit" style={iconStyles.icon} />}
                         />
                 }}

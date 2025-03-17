@@ -10,6 +10,7 @@ export enum ROUTES {
     VACCINATOR_PROFILE = 'VaccinatorProfile',
     VACCINATION_INFO = 'VaccinationInfo',
     ADD_NEW_VACCINE = 'AddNewVaccine',
+    CART = 'Cart',
     HOME_PAGE = 'Home',
     ADMIN_PAGE = 'Admin'
 }
