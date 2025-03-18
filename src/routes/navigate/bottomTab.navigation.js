@@ -33,9 +33,9 @@ export default function BottomTabNavigator() {
         headerShown: false, 
       })}
     >
+      <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Activities" component={Activities} />
       <Tab.Screen name="Contact" component={Prodd} />
-      <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Schedule" component={Schedule} />
       <Tab.Screen name="Account" component={AccountScreen
         
