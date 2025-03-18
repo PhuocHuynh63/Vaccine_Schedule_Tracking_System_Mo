@@ -7,8 +7,10 @@ import {
   ScrollView,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { useNavigation } from "@react-navigation/native";
 
 export default function HomeScreen() {
+  const navigation = useNavigation();
   return (
     <ScrollView>
       {/* Header */}
@@ -77,7 +79,15 @@ export default function HomeScreen() {
         {/* Icon Grid */}
         <View style={styles.gridContainer}>
           {gridItems.map((item, index) => (
-            <TouchableOpacity key={index} style={styles.gridItem}>
+            <TouchableOpacity 
+              key={index} 
+              style={styles.gridItem}
+              onPress={() => {
+                if (item.label === "Vaccine For You") {
+                  navigation.navigate("ListVaccinatorProfile");
+                }
+              }}
+              >
               <Ionicons
                 style={{
                   backgroundColor: "#CACACA",
