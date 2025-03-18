@@ -10,6 +10,8 @@ import { style } from '@themes/index';
 import { fontStyles } from '@styles/fonts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+const API_URL = 'http://10.0.2.2:8080/api/v1';
+
 const AddNewVaccine = () => {
   const route = useRoute<RouteProp<RootStackParamList, ROUTES.VACCINATOR_PROFILE>>();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -24,11 +26,22 @@ const AddNewVaccine = () => {
   useEffect(() => {
     const fetchVaccines = async () => {
       try {
-        const response = await fetch('https://666a8f987013419182cfc970.mockapi.io/api/vaccines');
-        const data = await response.json();
+        const response = await fetch(`${API_URL}/vaccine/search?status=UNCENSORED`);
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status} ${response.statusText}`);
+        }
 
-        if (Array.isArray(data)) {
-          setVaccines(data);
+        const data = await response.json();
+        console.log('API Response:', data); // Debug
+
+        const vaccineArray = data.data || data.vaccines || data;
+
+        if (Array.isArray(vaccineArray)) {
+          const mappedVaccines = vaccineArray.map(vaccine => ({
+            ...vaccine,
+            id: vaccine._id || vaccine.id, // Ánh xạ _id thành id nếu cần
+          }));
+          setVaccines(mappedVaccines);
         } else {
           setError('Invalid data format received from API');
         }
@@ -39,7 +52,7 @@ const AddNewVaccine = () => {
         }
       } catch (error) {
         console.error('Error fetching vaccines:', error);
-        setError('Failed to load vaccines');
+        setError('Failed to load vaccines: ' + error);
       } finally {
         setLoading(false);
       }
@@ -56,7 +69,6 @@ const AddNewVaccine = () => {
       } else {
         updatedSelected = prevSelected.filter(vaccineId => vaccineId !== id);
       }
-      // Update AsyncStorage whenever the selection changes
       AsyncStorage.setItem('selectedVaccines', JSON.stringify(updatedSelected));
       return updatedSelected;
     });

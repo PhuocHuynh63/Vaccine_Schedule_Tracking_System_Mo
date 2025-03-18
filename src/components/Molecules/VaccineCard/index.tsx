@@ -3,8 +3,10 @@ import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'rea
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Vaccine from '@atoms/Vaccine';
 
+const API_URL = 'http://10.0.2.2:8080/api/v1';
+
 interface VaccineCardProps {
-  onPress: (id: string, isSelected: boolean) => void; // Cập nhật để truyền cả trạng thái
+  onPress: (id: string, isSelected: boolean) => void;
   isSelected: boolean;
   vaccineId: string;
 }
@@ -20,7 +22,7 @@ const VaccineCard = ({ onPress, isSelected, vaccineId }: VaccineCardProps) => {
         if (cachedData) {
           setVaccine(JSON.parse(cachedData));
         } else {
-          const response = await fetch(`https://666a8f987013419182cfc970.mockapi.io/api/vaccines/${vaccineId}`);
+          const response = await fetch(`${API_URL}/vaccine/${vaccineId}`);
           const data = await response.json();
           setVaccine(data);
           await AsyncStorage.setItem(`vaccine_${vaccineId}`, JSON.stringify(data));
@@ -37,20 +39,17 @@ const VaccineCard = ({ onPress, isSelected, vaccineId }: VaccineCardProps) => {
 
   const handlePress = async () => {
     const newSelectedState = !isSelected;
-    onPress(vaccineId, newSelectedState); // Gọi hàm callback với trạng thái mới
+    onPress(vaccineId, newSelectedState);
 
-    // Lưu trạng thái lựa chọn vào AsyncStorage
     try {
       const selectedVaccines = await AsyncStorage.getItem('selectedVaccines');
       let selectedArray = selectedVaccines ? JSON.parse(selectedVaccines) : [];
 
       if (newSelectedState) {
-        // Thêm vaccineId vào mảng nếu được chọn
         if (!selectedArray.includes(vaccineId)) {
           selectedArray.push(vaccineId);
         }
       } else {
-        // Xóa vaccineId khỏi mảng nếu bỏ chọn
         selectedArray = selectedArray.filter((id: string) => id !== vaccineId);
       }
 

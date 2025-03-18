@@ -60,7 +60,7 @@ const StackNavigation = () => {
                 component={PasswordScreen}
                 options={{ headerShown: false }}
             />
-            
+
             <Stack.Screen
                 name={ROUTES.FORGOTPASSWORD}
                 component={ForgotPasswordScreen}
@@ -81,7 +81,7 @@ const StackNavigation = () => {
                         />
                 }}
             />
-            
+
             <Stack.Screen
                 name={ROUTES.VACCINATOR_PROFILE}
                 component={VaccinatorProfile}
