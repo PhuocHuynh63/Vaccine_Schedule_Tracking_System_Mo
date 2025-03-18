@@ -47,7 +47,6 @@ const PasswordScreen = () => {
         if (res.data.statusCode === 201) {
             const token = res.data.data.access_token
             await SercuseService.set('accessToken', token)
-            console.log('🔐 Here\'s your value 🔐 \n' + token);
 
             navigation.navigate(ROUTES.HOME_PAGE)
         }

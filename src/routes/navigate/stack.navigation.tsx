@@ -23,18 +23,7 @@ const Stack = createStackNavigator();
 
 const StackNavigation = () => {
     return (
-        <Stack.Navigator>
-            <Stack.Screen
-                name={ROUTES.LIST_VACCINATOR_PROFILE}
-                component={ListVaccinatorProfile}
-                options={{
-                    header: () =>
-                        <HeaderBooking
-                            children={'Booking'}
-                            icon={<AntDesign name="edit" style={iconStyles.icon} />}
-                        />
-                }}
-            />
+        <Stack.Navigator>           
             <Stack.Screen
                 name={ROUTES.CHOOSE_AUTHEN}
                 component={ChooseAuthenScreen}
@@ -60,7 +49,7 @@ const StackNavigation = () => {
                 component={PasswordScreen}
                 options={{ headerShown: false }}
             />
-
+            
             <Stack.Screen
                 name={ROUTES.FORGOTPASSWORD}
                 component={ForgotPasswordScreen}
@@ -81,7 +70,17 @@ const StackNavigation = () => {
                         />
                 }}
             />
-
+            <Stack.Screen
+                name={ROUTES.LIST_VACCINATOR_PROFILE}
+                component={ListVaccinatorProfile}
+                options={{
+                    header: () =>
+                        <HeaderBooking
+                            children={'Booking'}
+                            icon={<AntDesign name="edit" style={iconStyles.icon} />}
+                        />
+                }}
+            />
             <Stack.Screen
                 name={ROUTES.VACCINATOR_PROFILE}
                 component={VaccinatorProfile}

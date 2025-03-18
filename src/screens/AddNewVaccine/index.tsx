@@ -9,8 +9,7 @@ import { Button } from '@atoms/Button';
 import { style } from '@themes/index';
 import { fontStyles } from '@styles/fonts';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const API_URL = 'http://10.0.2.2:8080/api/v1';
+import VaccineService from '@services/vaccine/index';
 
 const AddNewVaccine = () => {
   const route = useRoute<RouteProp<RootStackParamList, ROUTES.VACCINATOR_PROFILE>>();
@@ -26,22 +25,11 @@ const AddNewVaccine = () => {
   useEffect(() => {
     const fetchVaccines = async () => {
       try {
-        const response = await fetch(`${API_URL}/vaccine/search?status=UNCENSORED`);
-        if (!response.ok) {
-          throw new Error(`API error: ${response.status} ${response.statusText}`);
-        }
+        const response = await VaccineService.getAllVaccines({ status: 'UNCENSORED' });
+        const data = response.data;
 
-        const data = await response.json();
-        console.log('API Response:', data); // Debug
-
-        const vaccineArray = data.data || data.vaccines || data;
-
-        if (Array.isArray(vaccineArray)) {
-          const mappedVaccines = vaccineArray.map(vaccine => ({
-            ...vaccine,
-            id: vaccine._id || vaccine.id, // Ánh xạ _id thành id nếu cần
-          }));
-          setVaccines(mappedVaccines);
+        if (Array.isArray(data.data)) {
+          setVaccines(data.data);
         } else {
           setError('Invalid data format received from API');
         }
@@ -52,7 +40,7 @@ const AddNewVaccine = () => {
         }
       } catch (error) {
         console.error('Error fetching vaccines:', error);
-        setError('Failed to load vaccines: ' + error);
+        setError('Failed to load vaccines');
       } finally {
         setLoading(false);
       }
@@ -61,87 +49,29 @@ const AddNewVaccine = () => {
     fetchVaccines();
   }, []);
 
-  const toggleVaccineSelection = async (id: string, isSelected: boolean) => {
-    setSelectedVaccines(prevSelected => {
-      let updatedSelected;
-      if (isSelected) {
-        updatedSelected = prevSelected.includes(id) ? prevSelected : [...prevSelected, id];
-      } else {
-        updatedSelected = prevSelected.filter(vaccineId => vaccineId !== id);
-      }
-      AsyncStorage.setItem('selectedVaccines', JSON.stringify(updatedSelected));
-      return updatedSelected;
-    });
-  };
-
-  const confirmSelection = async () => {
-    if (selectedVaccines.length > 0) {
-      const confirmed = vaccines.filter(vaccine => selectedVaccines.includes(vaccine.id.toString()));
-      setConfirmedVaccines(confirmed);
-      await AsyncStorage.setItem('confirmedVaccines', JSON.stringify(confirmed));
-      navigation.navigate(ROUTES.VACCINATION_INFO, { users: [{ userId: user }] });
-    }
-  };
-
-  if (loading) {
-    return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#0056b3" />
-      </View>
-    );
-  }
-
-  if (error || vaccines.length === 0) {
-    return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>{error || 'No vaccines available'}</Text>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
-      <FlatList
-        data={vaccines}
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.listContainer}
-        renderItem={({ item }) => (
-          <VaccineCard
-            vaccineId={item.id.toString()}
-            isSelected={selectedVaccines.includes(item.id.toString())}
-            onPress={toggleVaccineSelection}
-          />
-        )}
-      />
-
-      {confirmedVaccines.length > 0 && (
+      {loading ? (
+        <View style={styles.centerContainer}>
+          <ActivityIndicator size="large" color="#0056b3" />
+        </View>
+      ) : error ? (
+        <View style={styles.centerContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      ) : (
         <FlatList
-          data={confirmedVaccines}
+          data={vaccines}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <SelectedVaccineCard
-              vaccineName={item.name}
-              vaccineType={item.diseasePrevention}
-              price={item.price}
-              onDelete={async () => {
-                setConfirmedVaccines(prev => prev.filter(v => v.id !== item.id));
-                setSelectedVaccines(prev => {
-                  const updatedSelected = prev.filter(id => id !== item.id.toString());
-                  AsyncStorage.setItem('selectedVaccines', JSON.stringify(updatedSelected));
-                  return updatedSelected;
-                });
-                AsyncStorage.setItem('confirmedVaccines', JSON.stringify(confirmedVaccines.filter(v => v.id !== item.id)));
-              }}
+            <VaccineCard
+              vaccineId={item.id.toString()}
+              isSelected={selectedVaccines.includes(item.id.toString())}
+              onPress={() => {}}
             />
           )}
         />
       )}
-
-      <View style={styles.buttonContainer}>
-        <Button onPress={confirmSelection}>
-          <Text style={[fontStyles.fontButton]}>Confirm</Text>
-        </Button>
-      </View>
     </View>
   );
 };
@@ -158,23 +88,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'white',
-  },
-  listContainer: {
-    paddingBottom: 80,
-  },
-  buttonContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingVertical: style.sizes.padding.p_10,
-    paddingHorizontal: 16,
-    backgroundColor: 'white',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 3,
   },
   errorText: {
     color: 'red',

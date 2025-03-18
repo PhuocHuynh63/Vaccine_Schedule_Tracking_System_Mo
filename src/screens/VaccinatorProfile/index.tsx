@@ -8,10 +8,18 @@ import BlockInfo from '@molecules/BlockInfo';
 import { Button } from '@atoms/Button';
 import { style } from '@themes/index';
 import { fontStyles } from '@styles/fonts';
+import { SercuseService } from '@services/sercuseService';
+import { decodeToken } from '@utils/helper/decodeToken';
 
 const VaccinatorProfile = () => {
     const route = useRoute<RouteProp<RootStackParamList, ROUTES.VACCINATOR_PROFILE>>();
     const { userId: user } = route.params;
+    
+        const userRole = decodeToken().role
+        console.log(userRole);
+    
+    
+    
 
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 

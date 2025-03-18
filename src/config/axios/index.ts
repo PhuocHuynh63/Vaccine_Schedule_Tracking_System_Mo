@@ -1,3 +1,5 @@
+import { SercuseService } from '@services/sercuseService';
+import { decodeToken } from '@utils/helper/decodeToken';
 import axios, { AxiosError } from 'axios';
 
 const axiosClient = axios.create({
@@ -16,25 +18,31 @@ const axiosPrivate = axios.create({
 });
 
 // Interceptors cho axiosPrivate
-// axiosPrivate.interceptors.request.use(
-//     (config) => {
-//         // ********** Example **********
-//         //! lấy token & userRole từ redux store
-//         const token = localStorage.getItem('accessToken');
-//         const userRole = localStorage.getItem('userRole');
+axiosPrivate.interceptors.request.use(
+    async (config) => {
+        // ********** Example **********
+        //! lấy token & userRole từ redux store
+        
+        const token = await SercuseService.get("accessToken")
+        const userRole = decodeToken().role;
+        console.log(userRole);
+        
 
-//         if (token) {
-//             config.headers['Authorization'] = `Bearer ${token}`;
-//         }
-//         if (userRole) {
-//             config.headers['X-User-Role'] = userRole;
-//         }
-//         return config;
-//     },
-//     (error) => {
-//         return Promise.reject(error);
-//     },
-// );
+        if (token) {
+            config.headers['Authorization'] = `Bearer ${token}`;
+        }
+        if (userRole) {
+            config.headers['X-User-Role'] = userRole; // Gửi role trong header (tuỳ backend có cần hay không)
+        }
+        // if (userRole) {
+        //     config.headers['X-User-Role'] = userRole;
+        // }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    },
+);
 
 axiosPrivate.interceptors.response.use(
     (response) => response,
