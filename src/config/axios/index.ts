@@ -25,8 +25,6 @@ axiosPrivate.interceptors.request.use(
         
         const token = await SercuseService.get("accessToken")
         const userRole = decodeToken().role;
-        console.log(userRole);
-        
 
         if (token) {
             config.headers['Authorization'] = `Bearer ${token}`;

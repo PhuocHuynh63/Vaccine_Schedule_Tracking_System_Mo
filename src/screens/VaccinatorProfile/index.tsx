@@ -16,8 +16,6 @@ const VaccinatorProfile = () => {
     const { userId: user } = route.params;
     
         const userRole = decodeToken().role
-        console.log(userRole);
-    
     
     
 

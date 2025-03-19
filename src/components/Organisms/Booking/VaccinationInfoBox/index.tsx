@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CalendarPicker from 'react-native-calendar-picker';
 import CartService from '@services/cart/index'; // Thay bằng đường dẫn thực tế
 import SelectedVaccineCard from '@molecules/SelectedVaccineCard';
+import { AsyncStorageService } from '@services/asyncStorage';
 
 const VaccinationInfoBox = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -26,8 +27,6 @@ const VaccinationInfoBox = () => {
   const { userId: user } = route.params || {};
   const insets = useSafeAreaInsets();
 
-  console.log(route.params.userId);
-  
 
   const [showDetail, setShowDetail] = useState(false);
   const heightAnim = useRef(new Animated.Value(0)).current;
@@ -40,6 +39,20 @@ const VaccinationInfoBox = () => {
 
   // Calculate total price from selected vaccines
   const totalPrice = selectedVaccines.reduce((sum, vaccine) => sum + (vaccine.price || 0), 0);
+
+  const [userId, setUserId] = useState('');
+  console.log(userId);
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const storedUserId = await AsyncStorageService.getUserId('userId');
+        setUserId(storedUserId ?? '');
+      } catch (error) {
+        console.error('Error fetching user ID:', error);
+      }
+    };
+    fetchUserId();
+  }, [userId]);
 
   useEffect(() => {
     Animated.timing(heightAnim, {
