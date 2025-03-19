@@ -41,6 +41,8 @@ const VaccinationInfoBox = () => {
   const totalPrice = selectedVaccines.reduce((sum, vaccine) => sum + (vaccine.price || 0), 0);
 
   const [userId, setUserId] = useState('');
+  console.log(userId);
+
   useEffect(() => {
     const fetchUserId = async () => {
       try {
@@ -63,10 +65,10 @@ const VaccinationInfoBox = () => {
 
   useEffect(() => {
     const fetchCart = async () => {
-      if (user) {
+      if (userId) {
         try {
           setLoading(true);
-          const response = await CartService.getCartByUserId(user, false); // Lấy giỏ hàng chưa hoàn thành
+          const response = await CartService.getCartByUserId(userId, false); // Lấy giỏ hàng chưa hoàn thành
           console.log('Cart Response:', response.data);
           if (response.data && response.data.vaccine) {
             setSelectedVaccines(response.data.vaccine);
