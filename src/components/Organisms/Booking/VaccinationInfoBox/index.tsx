@@ -41,7 +41,6 @@ const VaccinationInfoBox = () => {
   const totalPrice = selectedVaccines.reduce((sum, vaccine) => sum + (vaccine.price || 0), 0);
 
   const [userId, setUserId] = useState('');
-  console.log(userId);
   useEffect(() => {
     const fetchUserId = async () => {
       try {
@@ -322,7 +321,7 @@ const VaccinationInfoBox = () => {
             </Button>
 
             <Button
-              onPress={() => navigation.navigate(ROUTES.ADD_NEW_VACCINE, { userId: user })}
+              onPress={() => navigation.navigate(ROUTES.ADD_NEW_VACCINE, { userId: userId })}
               style={[styles.buttonaction, blockStyles.oppositeBlock]}
             >
               <Text style={[fontStyles.fontButton, fontStyles.oppositeFont]}>Add new vaccine</Text>
