@@ -42,7 +42,7 @@ const VaccinatorProfile = () => {
             </ScrollView>
 
             <View style={styles.buttonContainer}>
-                <Button onPress={() => navigation.navigate(ROUTES.VACCINATION_INFO, { users: [{ userId: user }] })}>
+                <Button onPress={() => navigation.navigate(ROUTES.VACCINATION_INFO, { userId: user })}>
                     <Text style={[fontStyles.fontButton]}>Choose the person to vaccinate</Text>
                 </Button>
             </View>

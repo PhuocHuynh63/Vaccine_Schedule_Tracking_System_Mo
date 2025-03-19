@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Vaccine from '@atoms/Vaccine';
-
-const API_URL = 'http://10.0.2.2:8080/api/v1';
+import VaccineService from '@services/vaccine/index'; // Thay bằng đường dẫn thực tế
 
 interface VaccineCardProps {
   onPress: (id: string, isSelected: boolean) => void;
@@ -14,21 +12,33 @@ interface VaccineCardProps {
 const VaccineCard = ({ onPress, isSelected, vaccineId }: VaccineCardProps) => {
   const [vaccine, setVaccine] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchVaccine = async () => {
       try {
-        const cachedData = await AsyncStorage.getItem(`vaccine_${vaccineId}`);
-        if (cachedData) {
-          setVaccine(JSON.parse(cachedData));
+        // Gọi hàm getVaccineById từ VaccineService
+        const response = await VaccineService.getVaccineById(vaccineId);
+        console.log('Vaccine Response:', response.data); // Log để kiểm tra cấu trúc
+
+        // Kiểm tra và lấy dữ liệu vaccine từ response
+        let vaccineData;
+        if (response.data && response.data.data) {
+          vaccineData = response.data.data; // Nếu API trả về { data: { ...vaccine } }
+        } else if (response.data) {
+          vaccineData = response.data; // Nếu API trả về vaccine trực tiếp
         } else {
-          const response = await fetch(`${API_URL}/vaccine/${vaccineId}`);
-          const data = await response.json();
-          setVaccine(data);
-          await AsyncStorage.setItem(`vaccine_${vaccineId}`, JSON.stringify(data));
+          throw new Error('No vaccine data returned');
         }
-      } catch (error) {
-        console.error('Error fetching vaccine:', error);
+
+        if (vaccineData && vaccineData._id) {
+          setVaccine(vaccineData);
+        } else {
+          throw new Error('Invalid vaccine data format');
+        }
+      } catch (err) {
+        console.error('Error fetching vaccine:', err);
+        setError('Failed to load vaccine data');
       } finally {
         setLoading(false);
       }
@@ -37,34 +47,17 @@ const VaccineCard = ({ onPress, isSelected, vaccineId }: VaccineCardProps) => {
     fetchVaccine();
   }, [vaccineId]);
 
-  const handlePress = async () => {
+  const handlePress = () => {
     const newSelectedState = !isSelected;
-    onPress(vaccineId, newSelectedState);
-
-    try {
-      const selectedVaccines = await AsyncStorage.getItem('selectedVaccines');
-      let selectedArray = selectedVaccines ? JSON.parse(selectedVaccines) : [];
-
-      if (newSelectedState) {
-        if (!selectedArray.includes(vaccineId)) {
-          selectedArray.push(vaccineId);
-        }
-      } else {
-        selectedArray = selectedArray.filter((id: string) => id !== vaccineId);
-      }
-
-      await AsyncStorage.setItem('selectedVaccines', JSON.stringify(selectedArray));
-    } catch (error) {
-      console.error('Error saving selected vaccines:', error);
-    }
+    onPress(vaccineId, newSelectedState); // Gọi callback mà không tự cập nhật AsyncStorage
   };
 
   if (loading) {
     return <ActivityIndicator size="large" color="#0056b3" />;
   }
 
-  if (!vaccine) {
-    return <Text style={styles.errorText}>Error loading vaccine data</Text>;
+  if (error || !vaccine) {
+    return <Text style={styles.errorText}>{error || 'Error loading vaccine data'}</Text>;
   }
 
   return (
@@ -72,12 +65,12 @@ const VaccineCard = ({ onPress, isSelected, vaccineId }: VaccineCardProps) => {
       <View style={styles.infoContainer}>
         <Vaccine />
         <View style={styles.textContainer}>
-          <Text style={styles.name}>{vaccine.name}</Text>
+          <Text style={styles.name}>{vaccine.name || 'N/A'}</Text>
           <Text style={styles.description}>
             <Text style={styles.bold}>Disease prevention: </Text>
-            {vaccine.diseasePrevention}
+            {vaccine.diseasePrevention || 'N/A'}
           </Text>
-          <Text style={styles.price}>{vaccine.price} VNĐ</Text>
+          <Text style={styles.price}>{vaccine.price ? `${vaccine.price} VNĐ` : 'N/A'}</Text>
         </View>
       </View>
       <TouchableOpacity

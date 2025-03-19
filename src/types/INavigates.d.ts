@@ -37,7 +37,7 @@ type RootStackParamList = {
     };
     [ROUTES.VACCINATOR_PROFILE]: { userId: string };
     [ROUTES.VACCINATION_INFO]: {
-        users: [{ userId: string }];
+        userId: string;
         selectedVaccines?: string[];
     };
 };
