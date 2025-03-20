@@ -7,7 +7,7 @@ import { flexBoxStyles } from '@styles/flexBox'
 import ButtonAction from '../components/ButtonAction'
 import { style } from '@themes/index'
 import CustomLinearGradient from '@atoms/LinearGradient'
-import { NavigationProp, useNavigation } from '@react-navigation/core'
+import { NavigationProp, RouteProp, useNavigation, useRoute } from '@react-navigation/core'
 import { RootStackParamList } from 'src/types/INavigates'
 import { ROUTES } from '@routes/index'
 import UserService from '@services/user'
@@ -15,6 +15,7 @@ import UserService from '@services/user'
 const SignInScreen = () => {
 
   const navigation = useNavigation<NavigationProp<RootStackParamList>>()
+  const route = useRoute<RouteProp<RootStackParamList, ROUTES.SIGNIN>>()
 
   //#region React Hook Form
   const {
@@ -25,7 +26,7 @@ const SignInScreen = () => {
     reset,
   } = useForm({
     defaultValues: {
-      email: "",
+      email: route.params?.email || '',
     },
     mode: "onChange",
   })
@@ -33,7 +34,8 @@ const SignInScreen = () => {
   const emailValue = watch('email')
   const onSubmit = async (data: any) => {
     const isEmailExist = await UserService.isEmailExists(data.email)
-    if (isEmailExist) {
+
+    if (isEmailExist.data.data) {
       navigation.navigate(ROUTES.PASSWORD, { email: data.email })
     } else {
       navigation.navigate(ROUTES.REGISTER_ACCOUNT, { email: data.email })
