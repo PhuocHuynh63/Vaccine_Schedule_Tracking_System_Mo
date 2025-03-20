@@ -69,7 +69,7 @@ const AddNewVaccine = () => {
       try {
         const response = await CartService.createCart(user, selectedVaccines);
         console.log('Cart created:', response.data);
-        navigation.navigate(ROUTES.VACCINATION_INFO, { users: [{ userId: user }] });
+        navigation.navigate(ROUTES.VACCINATION_INFO, { userId: user });
       } catch (err) {
         console.error('Error creating cart:', err);
         setError('Failed to create cart');

@@ -67,11 +67,18 @@ const VaccinationInfoBox = () => {
     const fetchCart = async () => {
       if (userId) {
         try {
-          setLoading(true);
-          const response = await CartService.getCartByUserId(userId, false); // Lấy giỏ hàng chưa hoàn thành
+          const response = await CartService.getCartByUserId(userId, false);
           console.log('Cart Response:', response.data);
+          console.log('Cart Response Vaccines:', JSON.stringify(response.data.vaccine, null, 2));
           if (response.data && response.data.vaccine) {
-            setSelectedVaccines(response.data.vaccine);
+            const mappedVaccines = response.data.vaccine.map((vaccine) => ({
+              _id: vaccine.vaccineId,
+              name: vaccine.vaccineName,
+              diseasePrevention: vaccine.prevents,
+              price: vaccine.cost,
+              img: vaccine.imageUrl,
+            }));
+            setSelectedVaccines(mappedVaccines);
           } else {
             setSelectedVaccines([]);
           }
@@ -85,7 +92,7 @@ const VaccinationInfoBox = () => {
       }
     };
     fetchCart();
-  }, [user]);
+  }, [userId]); // Change dependency to `userId`
 
   const handleDeleteVaccine = async (vaccineId: string) => {
     // Logic xóa vaccine khỏi giỏ hàng cần gọi API để cập nhật server
@@ -295,20 +302,19 @@ const VaccinationInfoBox = () => {
             ) : (
               <FlatList
                 data={selectedVaccines}
-                keyExtractor={(item) => item._id.toString()} // Sử dụng _id từ giỏ hàng
+                keyExtractor={(item) => item._id?.toString() || Math.random().toString()}
                 renderItem={({ item }) => (
                   <SelectedVaccineCard
-                    vaccineName={item.name}
-                    vaccineType={item.diseasePrevention}
-                    price={item.price}
-                    onDelete={() => handleDeleteVaccine(item._id.toString())}
-                    imageSource={{ uri: item.img }} // Sử dụng img từ giỏ hàng
+                    vaccineName={item.name || 'Unknown Vaccine'}
+                    vaccineType={item.diseasePrevention || 'Unknown Disease'}
+                    price={item.price || 0}
+                    onDelete={() => handleDeleteVaccine(item._id?.toString() || '')}
+                    imageSource={{ uri: item.img || 'https://via.placeholder.com/50' }}
                   />
                 )}
-                contentContainerStyle={{ paddingVertical: 10 }}
-                style={{ maxHeight: 200 }}
-                showsVerticalScrollIndicator={true}
-                nestedScrollEnabled={true}
+                ListEmptyComponent={
+                  <Text style={styles.textCartEmpty}>No valid vaccine data to display</Text>
+                }
               />
             )}
           </View>
