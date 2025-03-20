@@ -15,6 +15,7 @@ import Entypo from '@expo/vector-icons/Entypo';
 import UserService from '@services/user'
 import { SercuseService } from '@services/sercuseService'
 import { AsyncStorageService } from '@services/asyncStorage'
+import Toast from 'react-native-toast-message'
 
 const PasswordScreen = () => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>()
@@ -43,13 +44,29 @@ const PasswordScreen = () => {
 
     const passwordValue = watch('password')
     const onSubmit = async (data: any) => {
-        const res = await UserService.login(data);
-        if (res.data.statusCode === 201) {
-            const token = res.data.data.access_token
-            await SercuseService.set('accessToken', token)
-            await AsyncStorageService.setUserId('userId', res.data.data.user._id)
+        try {
+            const res = await UserService.login(data);
 
-            navigation.navigate(ROUTES.HOME_PAGE)
+            if (res.data.statusCode === 201) {
+                const token = res.data.data.access_token
+                await SercuseService.set('accessToken', token)
+                await AsyncStorageService.setUserId('userId', res.data.data.user._id)
+
+                navigation.navigate(ROUTES.HOME_PAGE)
+                Toast.show({
+                    type: 'success',
+                    text1: res.data.message,
+                    text2: 'You have logged in successfully',
+                    visibilityTime: 2000,
+                });
+            }
+        } catch (error: any) {
+            Toast.show({
+                type: 'error',
+                text1: error.response?.data?.message,
+                text2: 'Please check your email and password',
+                visibilityTime: 5000,
+            });
         }
         reset();
     }

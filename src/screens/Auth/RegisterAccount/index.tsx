@@ -1,5 +1,3 @@
-"use client"
-
 import { Image, StyleSheet, Text, TextInput, View } from "react-native"
 import { useEffect, useState } from "react"
 import CustomLinearGradient from "@atoms/LinearGradient"
@@ -15,6 +13,7 @@ import { ROUTES } from "@routes/index"
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5"
 import Entypo from "@expo/vector-icons/Entypo"
 import UserService from "@services/user"
+import Toast from "react-native-toast-message";
 
 const RegisterAccountScreen = () => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>()
@@ -50,6 +49,10 @@ const RegisterAccountScreen = () => {
         const response = await UserService.register(data)
         if (response.data.statusCode === 201) {
             navigation.navigate(ROUTES.SIGNIN, { email: data.email })
+            Toast.show({
+                type: "success",
+                text1: response.data.message,
+            });
         }
         reset()
     }
