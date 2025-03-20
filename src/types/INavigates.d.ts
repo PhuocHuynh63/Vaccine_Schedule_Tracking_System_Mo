@@ -20,7 +20,7 @@ type Vaccine = {
 
 type RootStackParamList = {
     [ROUTES.CHOOSE_AUTHEN]: undefined;
-    [ROUTES.SIGNIN]: undefined;
+    [ROUTES.SIGNIN]: { email?: string };
     [ROUTES.PASSWORD]: { email: string };
     [ROUTES.REGISTER_ACCOUNT]: { email: string };
     [ROUTES.FORGOTPASSWORD]: undefined;
