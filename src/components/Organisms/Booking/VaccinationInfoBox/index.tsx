@@ -69,14 +69,15 @@ const VaccinationInfoBox = () => {
         try {
           const response = await CartService.getCartByUserId(userId, false);
           console.log('Cart Response:', response.data);
-          console.log('Cart Response Vaccines:', JSON.stringify(response.data.vaccine, null, 2));
-          if (response.data && response.data.vaccine) {
-            const mappedVaccines = response.data.vaccine.map((vaccine) => ({
-              _id: vaccine.vaccineId,
-              name: vaccine.vaccineName,
-              diseasePrevention: vaccine.prevents,
-              price: vaccine.cost,
-              img: vaccine.imageUrl,
+          console.log('Cart>>>>>>>>>>: ', response.data.data.vaccine);
+
+          if (response.data && response.data.data.vaccine) {
+            const mappedVaccines = response.data?.data?.vaccine?.map((vaccine) => ({
+              _id: vaccine._id,
+              name: vaccine.name,
+              diseasePrevention: vaccine.diseasePrevention,
+              price: vaccine.price,
+              img: vaccine.img,
             }));
             setSelectedVaccines(mappedVaccines);
           } else {
