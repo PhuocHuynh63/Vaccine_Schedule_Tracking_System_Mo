@@ -22,7 +22,7 @@ axiosPrivate.interceptors.request.use(
     async (config) => {
         // ********** Example **********
         //! lấy token & userRole từ redux store
-        
+
         const token = await SercuseService.get("accessToken")
         const userRole = decodeToken().role;
 

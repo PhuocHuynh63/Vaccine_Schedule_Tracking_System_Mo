@@ -5,6 +5,7 @@ import StackNavigation from '@routes/navigate/stack.navigation';
 import { Provider } from "react-redux";
 import store from './src/redux/store';
 import "./global.css"
+import Toast from 'react-native-toast-message';
 
 export default function App() {
   return (
@@ -12,6 +13,7 @@ export default function App() {
       <NavigationContainer>
         <StackNavigation></StackNavigation>
       </NavigationContainer>
+      <Toast />
     </Provider>
   );
 }
