@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'rea
 import Vaccine from '@atoms/Vaccine';
 import VaccineService from '@services/vaccine/index'; // Thay bằng đường dẫn thực tế
 
+
 interface VaccineCardProps {
   onPress: (id: string, isSelected: boolean) => void;
   isSelected: boolean;

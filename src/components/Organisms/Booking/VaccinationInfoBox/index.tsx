@@ -17,7 +17,8 @@ import { ROUTES } from '@routes/index';
 import { Button } from '@atoms/Button';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CalendarPicker from 'react-native-calendar-picker';
-import CartService from '@services/cart/index'; // Thay bằng đường dẫn thực tế
+import CartService from '@services/cart/index';
+import OrderService from '@services/order/index'; // Import OrderService
 import SelectedVaccineCard from '@molecules/SelectedVaccineCard';
 import { AsyncStorageService } from '@services/asyncStorage';
 
@@ -26,7 +27,6 @@ const VaccinationInfoBox = () => {
   const route = useRoute<RouteProp<RootStackParamList, ROUTES.VACCINATOR_PROFILE>>();
   const { userId: user } = route.params || {};
   const insets = useSafeAreaInsets();
-
 
   const [showDetail, setShowDetail] = useState(false);
   const heightAnim = useRef(new Animated.Value(0)).current;
@@ -37,9 +37,7 @@ const VaccinationInfoBox = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Calculate total price from selected vaccines
   const totalPrice = selectedVaccines.reduce((sum, vaccine) => sum + (vaccine.price || 0), 0);
-
   const [userId, setUserId] = useState('');
   console.log(userId);
 
@@ -93,12 +91,10 @@ const VaccinationInfoBox = () => {
       }
     };
     fetchCart();
-  }, [userId]); // Change dependency to `userId`
+  }, [userId]);
 
   const handleDeleteVaccine = async (vaccineId: string) => {
-    // Logic xóa vaccine khỏi giỏ hàng cần gọi API để cập nhật server
     try {
-      // Lấy giỏ hàng hiện tại
       const response = await CartService.getCartByUserId(user, false);
       const currentCart = response.data;
       if (currentCart && currentCart.vaccine) {
@@ -107,7 +103,7 @@ const VaccinationInfoBox = () => {
           user,
           vaccine: updatedVaccines.map((v) => v._id.toString()),
         };
-        await CartService.createCart(user, createCartDto.vaccine); // Cập nhật giỏ hàng
+        await CartService.createCart(user, createCartDto.vaccine);
         setSelectedVaccines(updatedVaccines);
       }
     } catch (err) {
@@ -124,20 +120,45 @@ const VaccinationInfoBox = () => {
     setCalendarModalVisible(false);
   }, []);
 
-  const handleConfirmPayment = () => {
-    navigation.navigate(ROUTES.CART, {
-      userId: user,
-      selectedVaccines: selectedVaccines,
-      totalPrice: totalPrice,
-      userInfo: {
-        fullName: "NGUYỄN MINH HOÀNG",
-        dateOfBirth: "05/10/2004",
-        phone: "0859849026",
-        vaccinationCenter: "VNVC Bà Thắng Hải-Thành Phố Hồ Chí Minh",
-        expectedDate: selectedDate ? selectedDate.toLocaleDateString() : "08/05/2025",
-      },
-    });
-  };
+  const handleConfirmPayment = async () => {
+    if (!userId || selectedVaccines.length === 0 || !selectedDate) {
+        alert('Please ensure you have selected a user, vaccines, and a date.');
+        return;
+    }
+
+    try {
+        // Prepare the order data
+        const orderData = {
+            userId: userId,
+            vaccines: selectedVaccines.map((vaccine) => ({
+                vaccineId: vaccine._id,
+                count: 1, // Assuming one dose per vaccine; adjust if needed
+            })),
+        };
+
+        // Create the order using OrderService
+        const response = await OrderService.createOrder(orderData);
+        const createdOrder = response.data;
+
+        // Navigate to CartPage with the created order
+        navigation.navigate(ROUTES.CART, {
+            userId: user,
+            selectedVaccines: selectedVaccines,
+            totalPrice: totalPrice,
+            userInfo: {
+                fullName: "NGUYỄN MINH HOÀNG",
+                dateOfBirth: "05/10/2004",
+                phone: "0859849026",
+                vaccinationCenter: "VNVC Bà Thắng Hải-Thành Phố Hồ Chí Minh",
+                expectedDate: selectedDate ? selectedDate.toLocaleDateString() : "08/05/2025",
+            },
+            order: createdOrder, // Pass the created order to CartPage
+        });
+    } catch (error) {
+        console.error('Error creating order:', error);
+        alert('Failed to create order. Please try again.');
+    }
+};
 
   if (loading) {
     return (

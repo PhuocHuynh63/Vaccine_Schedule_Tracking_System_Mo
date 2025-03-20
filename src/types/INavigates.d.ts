@@ -18,6 +18,21 @@ type Vaccine = {
     diseasePrevention?: string;
 };
 
+type Order = {
+    id?: string; // Changed from orderId to id to match the server response
+    userId?: string;
+    vaccines?: {
+        vaccineId: string;
+        countDoseNumber?: number;
+        injectionHistory?: any[];
+        nextScheduledDate?: string;
+        status?: string;
+    }[];
+    createdAt?: string;
+    updatedAt?: string;
+    __v?: number;
+};
+
 type RootStackParamList = {
     [ROUTES.CHOOSE_AUTHEN]: undefined;
     [ROUTES.SIGNIN]: undefined;
@@ -31,9 +46,10 @@ type RootStackParamList = {
     [ROUTES.ADD_NEW_VACCINE]: { userId: string };
     [ROUTES.CART]: {
         userId: string;
-        selectedVaccines?: Vaccine[]; // Array of vaccines
-        totalPrice?: number; // Total price in VND
-        userInfo?: UserInfo; // User information object
+        selectedVaccines?: Vaccine[];
+        totalPrice?: number;
+        userInfo?: UserInfo;
+        order?: Order; // Use the updated Order type
     };
     [ROUTES.VACCINATOR_PROFILE]: { userId: string };
     [ROUTES.VACCINATION_INFO]: {

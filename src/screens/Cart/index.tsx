@@ -10,17 +10,14 @@ import Entypo from '@expo/vector-icons/Entypo';
 const CartPage = () => {
   const route = useRoute<RouteProp<RootStackParamList, ROUTES.CART>>();
   const navigation = useNavigation();
-  const { userId, selectedVaccines = [], totalPrice, userInfo } = route.params || {};
+  const { userId, selectedVaccines = [], totalPrice, userInfo, order } = route.params || {};
   const [modalVisible, setModalVisible] = useState(false);
 
   const handlePayment = () => {
-    // Add payment logic here (e.g., API call to process payment)
     console.log('Processing payment for', selectedVaccines.length, 'vaccines, total:', totalPrice);
 
-    // Show success modal
     setModalVisible(true);
 
-    // Automatically close modal and navigate after 2 seconds
     setTimeout(() => {
       setModalVisible(false);
       navigation.navigate(ROUTES.HOME_PAGE);
@@ -29,11 +26,9 @@ const CartPage = () => {
 
   return (
     <View style={styles.container}>
-
       {/* Recipient Information */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Recipient Information</Text>
-
         <View style={styles.infoRow}>
           <Text style={styles.label}>Full Name</Text>
           <Text style={styles.value}>{userInfo?.fullName || 'NGUYỄN MINH HOÀNG'}</Text>
@@ -62,7 +57,6 @@ const CartPage = () => {
       {/* Vaccine Selection */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Selected Vaccines ({selectedVaccines.length})</Text>
-
         {selectedVaccines.length > 0 ? (
           selectedVaccines.map((vaccine, index) => (
             <View key={index} style={styles.vaccineItem}>
@@ -77,10 +71,34 @@ const CartPage = () => {
         )}
       </View>
 
+      {/* Order Information (New Section) */}
+      {order && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Order Information</Text>
+          <View style={styles.infoRow}>
+            <Text style={styles.label}>Order ID</Text>
+            <Text style={styles.value}>{order.id || 'N/A'}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.label}>Scheduled Date</Text>
+            <Text style={styles.value}>{order.vaccines?.[0]?.nextScheduledDate || 'N/A'}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.label}>Status</Text>
+            <Text style={styles.value}>{order.vaccines?.[0]?.status || 'N/A'}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.label}>Vaccines</Text>
+            <Text style={styles.value}>
+              {order.vaccines?.map((v) => v.vaccineId).join(', ') || 'N/A'}
+            </Text>
+          </View>
+        </View>
+      )}
+
       {/* Payment Information */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Payment Information</Text>
-
         <View style={styles.paymentRow}>
           <Text style={styles.label}>Total ({selectedVaccines.length} items)</Text>
           <Text style={styles.value}>
