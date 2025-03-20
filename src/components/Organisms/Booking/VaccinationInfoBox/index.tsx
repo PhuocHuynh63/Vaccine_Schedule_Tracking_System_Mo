@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { Animated, StyleSheet, Text, TouchableOpacity, View, FlatList, ActivityIndicator, Modal } from 'react-native';
+import { Animated, StyleSheet, Text, TouchableOpacity, View, FlatList, ActivityIndicator, Modal, ScrollView } from 'react-native';
 import { style } from '@themes/index';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Entypo from '@expo/vector-icons/Entypo';
@@ -18,7 +18,7 @@ import { Button } from '@atoms/Button';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CalendarPicker from 'react-native-calendar-picker';
 import CartService from '@services/cart/index';
-import OrderService from '@services/order/index'; // Import OrderService
+import OrderService from '@services/order/index';
 import SelectedVaccineCard from '@molecules/SelectedVaccineCard';
 import { AsyncStorageService } from '@services/asyncStorage';
 
@@ -122,43 +122,44 @@ const VaccinationInfoBox = () => {
 
   const handleConfirmPayment = async () => {
     if (!userId || selectedVaccines.length === 0 || !selectedDate) {
-        alert('Please ensure you have selected a user, vaccines, and a date.');
-        return;
+      alert('Please ensure you have selected a user, vaccines, and a date.');
+      return;
     }
 
     try {
-        // Prepare the order data
-        const orderData = {
-            userId: userId,
-            vaccines: selectedVaccines.map((vaccine) => ({
-                vaccineId: vaccine._id,
-                count: 1, // Assuming one dose per vaccine; adjust if needed
-            })),
-        };
+      // Prepare the order data with the selected date
+      const orderData = {
+        userId: userId,
+        vaccines: selectedVaccines.map((vaccine) => ({
+          vaccineId: vaccine._id,
+          count: 1,
+          nextScheduledDate: selectedDate.toISOString(), // Add the selected date in ISO format
+        })),
+      };
 
-        // Create the order using OrderService
-        const response = await OrderService.createOrder(orderData);
-        const createdOrder = response.data;
+      // Create the order using OrderService
+      const response = await OrderService.createOrder(orderData);
+      const createdOrder = response.data;
 
-        // Navigate to CartPage with the created order
-        navigation.navigate(ROUTES.CART, {
-            userId: user,
-            selectedVaccines: selectedVaccines,
-            totalPrice: totalPrice,
-            userInfo: {
-                fullName: "NGUYỄN MINH HOÀNG",
-                dateOfBirth: "05/10/2004",
-                phone: "0859849026",
-                vaccinationCenter: "VNVC Bà Thắng Hải-Thành Phố Hồ Chí Minh",
-                expectedDate: selectedDate ? selectedDate.toLocaleDateString() : "08/05/2025",
-            },
-            order: createdOrder, // Pass the created order to CartPage
-        });
+      // Navigate to CartPage with the created order
+      navigation.navigate(ROUTES.CART, {
+        userId: user,
+        selectedVaccines: selectedVaccines,
+        totalPrice: totalPrice,
+        userInfo: {
+          fullName: "NGUYỄN MINH HOÀNG",
+          dateOfBirth: "05/10/2004",
+          phone: "0859849026",
+          vaccinationCenter: "VNVC Bà Thắng Hải-Thành Phố Hồ Chí Minh",
+          expectedDate: selectedDate ? selectedDate.toLocaleDateString() : "08/05/2025",
+        },
+        order: createdOrder, // Pass the created order to CartPage
+      });
     } catch (error) {
-        console.error('Error creating order:', error);
-        alert('Failed to create order. Please try again.');
+      console.error('Error creating order:', error);
+      alert('Failed to create order. Please try again.');
     }
-};
+  };
 
   if (loading) {
     return (
@@ -178,191 +179,197 @@ const VaccinationInfoBox = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.boxContainer}>
-        <View style={styles.boxHeader}>
-          <Text style={styles.fullname}>HUỲNH MINH PHƯỚC</Text>
-          <View style={styles.boxAction}>
-            <TouchableOpacity activeOpacity={0.7}>
-              <MaterialIcons name="edit" size={24} />
-            </TouchableOpacity>
-            <TouchableOpacity activeOpacity={0.7}>
-              <Ionicons name="trash" size={24} color={style.colors.red.bg} />
-            </TouchableOpacity>
+      <ScrollView style={styles.scrollContainer}>
+        <View style={styles.boxContainer}>
+          <View style={styles.boxHeader}>
+            <Text style={styles.fullname}>HUỲNH MINH PHƯỚC</Text>
+            <View style={styles.boxAction}>
+              <TouchableOpacity activeOpacity={0.7}>
+                <MaterialIcons name="edit" size={24} />
+              </TouchableOpacity>
+              <TouchableOpacity activeOpacity={0.7}>
+                <Ionicons name="trash" size={24} color={style.colors.red.bg} />
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
 
-        <View style={styles.detailUserContainer}>
-          <TouchableOpacity style={styles.titleDetail} activeOpacity={0.8} onPress={toggleDetail}>
-            <Text style={styles.textTitle}>Details of the person vaccinated</Text>
-            {showDetail ? (
-              <FontAwesome5 name="chevron-up" size={18} color={style.colors.blue.bg} />
-            ) : (
-              <FontAwesome5 name="chevron-down" size={18} color={style.colors.blue.bg} />
+          <View style={styles.detailUserContainer}>
+            <TouchableOpacity style={styles.titleDetail} activeOpacity={0.8} onPress={toggleDetail}>
+              <Text style={styles.textTitle}>Details of the person vaccinated</Text>
+              {showDetail ? (
+                <FontAwesome5 name="chevron-up" size={18} color={style.colors.blue.bg} />
+              ) : (
+                <FontAwesome5 name="chevron-down" size={18} color={style.colors.blue.bg} />
+              )}
+            </TouchableOpacity>
+            {showDetail && (
+              <Animated.View
+                style={[
+                  { gap: 5, marginTop: style.sizes.margin.m_12, marginBottom: style.sizes.margin.m_16 },
+                  { height: heightAnim },
+                ]}
+              >
+                <View style={styles.detailUserInfo}>
+                  <Text style={styles.textTitleDetail}>Fullname </Text>
+                  <Text style={styles.textContentDetail}>HUỲNH MINH PHƯỚC</Text>
+                </View>
+                <View style={styles.detailUserInfo}>
+                  <Text style={styles.textTitleDetail}>Phone </Text>
+                  <Text style={styles.textContentDetail}>0123456789</Text>
+                </View>
+                <View style={styles.detailUserInfo}>
+                  <Text style={styles.textTitleDetail}>Birthday </Text>
+                  <Text style={styles.textContentDetail}>06/03/1999</Text>
+                </View>
+                <View style={styles.detailUserInfo}>
+                  <Text style={styles.textTitleDetail}>Relationship </Text>
+                  <Text style={styles.textContentDetail}>Me</Text>
+                </View>
+                <View style={styles.detailUserInfo}>
+                  <Text style={styles.textTitleDetail}>Sex </Text>
+                  <Text style={styles.textContentDetail}>Male</Text>
+                </View>
+                <View style={styles.detailUserInfo}>
+                  <Text style={styles.textTitleDetail}>Email </Text>
+                  <Text style={styles.textContentDetail}>Updating</Text>
+                </View>
+                <View style={styles.detailUserInfo}>
+                  <Text style={styles.textTitleDetail}>Address </Text>
+                  <Text style={styles.textContentDetail}>
+                    10 Lê Văn Việt, Phường 2, Thành Phố Thủ Đức, Tỉnh Tiền Giang
+                  </Text>
+                </View>
+              </Animated.View>
             )}
-          </TouchableOpacity>
-          {showDetail && (
-            <Animated.View
-              style={[
-                { gap: 5, marginTop: style.sizes.margin.m_12, marginBottom: style.sizes.margin.m_16 },
-                { height: heightAnim },
-              ]}
-            >
-              <View style={styles.detailUserInfo}>
-                <Text style={styles.textTitleDetail}>Fullname </Text>
-                <Text style={styles.textContentDetail}>HUỲNH MINH PHƯỚC</Text>
-              </View>
-              <View style={styles.detailUserInfo}>
-                <Text style={styles.textTitleDetail}>Phone </Text>
-                <Text style={styles.textContentDetail}>0123456789</Text>
-              </View>
-              <View style={styles.detailUserInfo}>
-                <Text style={styles.textTitleDetail}>Birthday </Text>
-                <Text style={styles.textContentDetail}>06/03/1999</Text>
-              </View>
-              <View style={styles.detailUserInfo}>
-                <Text style={styles.textTitleDetail}>Relationship </Text>
-                <Text style={styles.textContentDetail}>Me</Text>
-              </View>
-              <View style={styles.detailUserInfo}>
-                <Text style={styles.textTitleDetail}>Sex </Text>
-                <Text style={styles.textContentDetail}>Male</Text>
-              </View>
-              <View style={styles.detailUserInfo}>
-                <Text style={styles.textTitleDetail}>Email </Text>
-                <Text style={styles.textContentDetail}>Updating</Text>
-              </View>
-              <View style={styles.detailUserInfo}>
-                <Text style={styles.textTitleDetail}>Address </Text>
-                <Text style={styles.textContentDetail}>
-                  10 Lê Văn Việt, Phường 2, Thành Phố Thủ Đức, Tỉnh Tiền Giang
-                </Text>
-              </View>
-            </Animated.View>
-          )}
-        </View>
-
-        <View>
-          <View>
-            <Text style={styles.vaccineInfo}>
-              Select the desired vaccination center{' '}
-              <Text style={[styles.vaccineInfo, { color: style.colors.red.bg, fontWeight: 'bold' }]}>*</Text>
-            </Text>
-            <SelectVaccinationSite>
-              <Text style={styles.textSelect}>Select Vaccination Site</Text>
-              <Entypo name="chevron-small-right" size={24} color="black" />
-            </SelectVaccinationSite>
           </View>
 
           <View>
-            <Text style={styles.vaccineInfo}>
-              Select vaccination date{' '}
-              <Text style={[styles.vaccineInfo, { color: style.colors.red.bg, fontWeight: 'bold' }]}>*</Text>
-            </Text>
-            <SelectVaccinationSite onPress={() => setCalendarModalVisible(true)}>
-              <Text style={styles.textSelect}>
-                {selectedDate ? selectedDate.toLocaleDateString() : 'Select Date'}
+            <View>
+              <Text style={styles.vaccineInfo}>
+                Select the desired vaccination center{' '}
+                <Text style={[styles.vaccineInfo, { color: style.colors.red.bg, fontWeight: 'bold' }]}>*</Text>
               </Text>
-              <FontAwesome name="calendar" size={18} color="black" />
-            </SelectVaccinationSite>
+              <SelectVaccinationSite>
+                <Text style={styles.textSelect}>Select Vaccination Site</Text>
+                <Entypo name="chevron-small-right" size={24} color="black" />
+              </SelectVaccinationSite>
+            </View>
 
-            <Modal
-              transparent={true}
-              visible={calendarModalVisible}
-              animationType="fade"
-              onRequestClose={() => setCalendarModalVisible(false)}
-            >
-              <View style={styles.modalOverlay}>
-                <View style={styles.modalContainer}>
-                  <View style={styles.modalHeader}>
-                    <Text style={styles.modalTitle}>Select Vaccination Date</Text>
-                    <TouchableOpacity onPress={() => setCalendarModalVisible(false)}>
-                      <FontAwesome name="close" size={24} color={style.colors.blue.bg} />
-                    </TouchableOpacity>
-                  </View>
-                  <CalendarPicker
-                    onDateChange={onDateChange}
-                    selectedDayColor={style.colors.blue.bg}
-                    selectedDayTextColor="#FFFFFF"
-                    todayBackgroundColor={style.colors.red.bg}
-                    todayTextStyle={{ color: '#FFFFFF' }}
-                    minDate={new Date(2024, 0, 1)}
-                    maxDate={new Date(2026, 11, 31)}
-                    previousComponent={<FontAwesome name="chevron-left" size={18} color={style.colors.blue.bg} />}
-                    nextComponent={<FontAwesome name="chevron-right" size={18} color={style.colors.blue.bg} />}
-                    textStyle={{ fontSize: 16, color: '#000000' }}
-                    selectedStartDate={selectedDate}
-                    width={300}
-                  />
-                  <View style={styles.modalFooter}>
-                    <TouchableOpacity style={styles.modalButton} onPress={() => setCalendarModalVisible(false)}>
-                      <Text style={styles.modalButtonText}>Cancel</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[styles.modalButton, styles.modalButtonConfirm]}
-                      onPress={() => {
-                        if (selectedDate) setCalendarModalVisible(false);
-                      }}
-                    >
-                      <Text style={styles.modalButtonConfirmText}>Confirm</Text>
-                    </TouchableOpacity>
+            <View>
+              <Text style={styles.vaccineInfo}>
+                Select vaccination date{' '}
+                <Text style={[styles.vaccineInfo, { color: style.colors.red.bg, fontWeight: 'bold' }]}>*</Text>
+              </Text>
+              <SelectVaccinationSite onPress={() => setCalendarModalVisible(true)}>
+                <Text style={styles.textSelect}>
+                  {selectedDate ? selectedDate.toLocaleDateString() : 'Select Date'}
+                </Text>
+                <FontAwesome name="calendar" size={18} color="black" />
+              </SelectVaccinationSite>
+
+              <Modal
+                transparent={true}
+                visible={calendarModalVisible}
+                animationType="fade"
+                onRequestClose={() => setCalendarModalVisible(false)}
+              >
+                <View style={styles.modalOverlay}>
+                  <View style={styles.modalContainer}>
+                    <View style={styles.modalHeader}>
+                      <Text style={styles.modalTitle}>Select Vaccination Date</Text>
+                      <TouchableOpacity onPress={() => setCalendarModalVisible(false)}>
+                        <FontAwesome name="close" size={24} color={style.colors.blue.bg} />
+                      </TouchableOpacity>
+                    </View>
+                    <CalendarPicker
+                      onDateChange={onDateChange}
+                      selectedDayColor={style.colors.blue.bg}
+                      selectedDayTextColor="#FFFFFF"
+                      todayBackgroundColor={style.colors.red.bg}
+                      todayTextStyle={{ color: '#FFFFFF' }}
+                      minDate={new Date(2024, 0, 1)}
+                      maxDate={new Date(2026, 11, 31)}
+                      previousComponent={<FontAwesome name="chevron-left" size={18} color={style.colors.blue.bg} />}
+                      nextComponent={<FontAwesome name="chevron-right" size={18} color={style.colors.blue.bg} />}
+                      textStyle={{ fontSize: 16, color: '#000000' }}
+                      selectedStartDate={selectedDate}
+                      width={300}
+                    />
+                    <View style={styles.modalFooter}>
+                      <TouchableOpacity style={styles.modalButton} onPress={() => setCalendarModalVisible(false)}>
+                        <Text style={styles.modalButtonText}>Cancel</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.modalButton, styles.modalButtonConfirm]}
+                        onPress={() => {
+                          if (selectedDate) setCalendarModalVisible(false);
+                        }}
+                      >
+                        <Text style={styles.modalButtonConfirmText}>Confirm</Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 </View>
-              </View>
-            </Modal>
-          </View>
+              </Modal>
+            </View>
 
-          <View>
-            <Text style={styles.vaccineInfo}>
-              Select vaccination{' '}
-              <Text style={[styles.vaccineInfo, { color: style.colors.red.bg, fontWeight: 'bold' }]}>*</Text>
-            </Text>
-            {selectedVaccines.length === 0 ? (
-              <View style={styles.cartEmpty}>
-                <FontAwesome5 name="list-alt" size={100} color="rgba(106,107,187,0.2)" />
-                <Text style={styles.textCartEmpty}>List of vaccines to buy is empty</Text>
-              </View>
-            ) : (
-              <FlatList
-                data={selectedVaccines}
-                keyExtractor={(item) => item._id?.toString() || Math.random().toString()}
-                renderItem={({ item }) => (
-                  <SelectedVaccineCard
-                    vaccineName={item.name || 'Unknown Vaccine'}
-                    vaccineType={item.diseasePrevention || 'Unknown Disease'}
-                    price={item.price || 0}
-                    onDelete={() => handleDeleteVaccine(item._id?.toString() || '')}
-                    imageSource={{ uri: item.img || 'https://via.placeholder.com/50' }}
+            <View>
+              <Text style={styles.vaccineInfo}>
+                Select vaccination{' '}
+                <Text style={[styles.vaccineInfo, { color: style.colors.red.bg, fontWeight: 'bold' }]}>*</Text>
+              </Text>
+              <View style={styles.vaccineListContainer}>
+                {selectedVaccines.length === 0 ? (
+                  <View style={styles.cartEmpty}>
+                    <FontAwesome5 name="list-alt" size={100} color="rgba(106,107,187,0.2)" />
+                    <Text style={styles.textCartEmpty}>List of vaccines to buy is empty</Text>
+                  </View>
+                ) : (
+                  <FlatList
+                    data={selectedVaccines}
+                    keyExtractor={(item) => item._id?.toString() || Math.random().toString()}
+                    renderItem={({ item }) => (
+                      <SelectedVaccineCard
+                        vaccineName={item.name || 'Unknown Vaccine'}
+                        vaccineType={item.diseasePrevention || 'Unknown Disease'}
+                        price={item.price || 0}
+                        onDelete={() => handleDeleteVaccine(item._id?.toString() || '')}
+                        imageSource={{ uri: item.img || 'https://via.placeholder.com/50' }}
+                      />
+                    )}
+                    ListEmptyComponent={
+                      <Text style={styles.textCartEmpty}>No valid vaccine data to display</Text>
+                    }
+                    showsVerticalScrollIndicator={true}
+                    nestedScrollEnabled={true}
                   />
                 )}
-                ListEmptyComponent={
-                  <Text style={styles.textCartEmpty}>No valid vaccine data to display</Text>
-                }
-              />
-            )}
-          </View>
+              </View>
+            </View>
 
-          <View style={styles.actionButton}>
-            <Button
-              onPress={() => navigation.navigate(ROUTES.SELECT_FROM_CART, { userId: user })}
-              style={styles.buttonaction}
-            >
-              <FontAwesome5 name="shopping-cart" size={18} color="white" style={{ marginRight: 7 }} />
-              <Text style={[fontStyles.fontButton]}>Add from cart</Text>
-            </Button>
+            <View style={styles.actionButton}>
+              <Button
+                onPress={() => navigation.navigate(ROUTES.SELECT_FROM_CART, { userId: user })}
+                style={styles.buttonaction}
+              >
+                <FontAwesome5 name="shopping-cart" size={18} color="white" style={{ marginRight: 7 }} />
+                <Text style={[fontStyles.fontButton]}>Add from cart</Text>
+              </Button>
 
-            <Button
-              onPress={() => navigation.navigate(ROUTES.ADD_NEW_VACCINE, { userId: userId })}
-              style={[styles.buttonaction, blockStyles.oppositeBlock]}
-            >
-              <Text style={[fontStyles.fontButton, fontStyles.oppositeFont]}>Add new vaccine</Text>
-            </Button>
-          </View>
+              <Button
+                onPress={() => navigation.navigate(ROUTES.ADD_NEW_VACCINE, { userId: userId })}
+                style={[styles.buttonaction, blockStyles.oppositeBlock]}
+              >
+                <Text style={[fontStyles.fontButton, fontStyles.oppositeFont]}>Add new vaccine</Text>
+              </Button>
+            </View>
 
-          <View style={[flexBoxStyles.centerColumn]}>
-            <Feather name="chevrons-up" size={24} color="black" />
+            <View style={[flexBoxStyles.centerColumn]}>
+              <Feather name="chevrons-up" size={24} color="black" />
+            </View>
           </View>
         </View>
-      </View>
+      </ScrollView>
 
       <View style={styles.paymentSummaryContainer}>
         <View style={styles.paymentSummaryContent}>
@@ -385,8 +392,12 @@ const VaccinationInfoBox = () => {
 
 export default VaccinationInfoBox;
 
+// Styles remain the same as in your original code
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  scrollContainer: {
     flex: 1,
   },
   boxContainer: {
@@ -471,7 +482,10 @@ const styles = StyleSheet.create({
     marginHorizontal: 0,
     borderRadius: style.sizes.borderRadius.br_13,
   },
-  // Modal Calendar CSS
+  vaccineListContainer: {
+    maxHeight: 300,
+    marginVertical: 10,
+  },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -534,8 +548,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: '600',
   },
-
-  // Payment Summary styles - new styles added for the payment summary section
   paymentSummaryContainer: {
     position: 'absolute',
     bottom: 0,

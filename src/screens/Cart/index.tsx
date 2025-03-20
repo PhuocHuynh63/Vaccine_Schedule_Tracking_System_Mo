@@ -24,6 +24,12 @@ const CartPage = () => {
     }, 2000);
   };
 
+  const formatDate = (isoDate: string) => {
+    if (!isoDate) return 'N/A';
+    const date = new Date(isoDate);
+    return date.toLocaleDateString(); // Format to local date string (e.g., "MM/DD/YYYY")
+  };
+
   return (
     <View style={styles.container}>
       {/* Recipient Information */}
@@ -81,7 +87,11 @@ const CartPage = () => {
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.label}>Scheduled Date</Text>
-            <Text style={styles.value}>{order.vaccines?.[0]?.nextScheduledDate || 'N/A'}</Text>
+            <Text style={styles.value}>
+              {order.vaccines?.[0]?.nextScheduledDate
+                ? formatDate(order.vaccines[0].nextScheduledDate)
+                : 'N/A'}
+            </Text>
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.label}>Status</Text>
