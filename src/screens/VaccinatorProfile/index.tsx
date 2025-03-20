@@ -8,10 +8,16 @@ import BlockInfo from '@molecules/BlockInfo';
 import { Button } from '@atoms/Button';
 import { style } from '@themes/index';
 import { fontStyles } from '@styles/fonts';
+import { SercuseService } from '@services/sercuseService';
+import { decodeToken } from '@utils/helper/decodeToken';
 
 const VaccinatorProfile = () => {
     const route = useRoute<RouteProp<RootStackParamList, ROUTES.VACCINATOR_PROFILE>>();
     const { userId: user } = route.params;
+    
+        const userRole = decodeToken().role
+    
+    
 
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
@@ -34,7 +40,7 @@ const VaccinatorProfile = () => {
             </ScrollView>
 
             <View style={styles.buttonContainer}>
-                <Button onPress={() => navigation.navigate(ROUTES.VACCINATION_INFO, { users: [{ userId: user }] })}>
+                <Button onPress={() => navigation.navigate(ROUTES.VACCINATION_INFO, { userId: user })}>
                     <Text style={[fontStyles.fontButton]}>Choose the person to vaccinate</Text>
                 </Button>
             </View>

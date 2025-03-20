@@ -1,7 +1,7 @@
 "use client"
 
 import { Image, StyleSheet, Text, TextInput, View } from "react-native"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import CustomLinearGradient from "@atoms/LinearGradient"
 import { Controller, useForm } from "react-hook-form"
 import { blockStyles } from "@styles/block"
@@ -11,11 +11,12 @@ import ButtonAction from "../components/ButtonAction"
 import { style } from "@themes/index"
 import { type NavigationProp, type RouteProp, useNavigation, useRoute } from "@react-navigation/native"
 import type { RootStackParamList } from "src/types/INavigates"
-import type { ROUTES } from "@routes/index"
+import { ROUTES } from "@routes/index"
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5"
 import Entypo from "@expo/vector-icons/Entypo"
+import UserService from "@services/user"
 
-const RegisterAccount = () => {
+const RegisterAccountScreen = () => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>()
     const route = useRoute<RouteProp<RootStackParamList, ROUTES.REGISTER_ACCOUNT>>()
 
@@ -28,21 +29,29 @@ const RegisterAccount = () => {
         reset,
     } = useForm({
         defaultValues: {
+            email: "",
+            fullname: "",
             password: "",
             confirmPassword: "",
         },
         mode: "onChange",
     })
 
+    useEffect(() => {
+        if (route.params?.email) {
+            reset({ email: route.params.email, password: "" })
+        }
+    }, [route.params?.email, reset])
+
     const password = watch("password")
     const confirmPassword = watch("confirmPassword")
 
-    const onSubmit = (data: any) => {
-        console.log(data)
-        // TODO: Register user with email and password
-        // You can add your registration logic here
+    const onSubmit = async (data: any) => {
+        const response = await UserService.register(data)
+        if (response.data.statusCode === 201) {
+            navigation.navigate(ROUTES.SIGNIN, { email: data.email })
+        }
         reset()
-        // Navigate to success screen or home screen after registration
     }
     //#endregion
 
@@ -69,6 +78,35 @@ const RegisterAccount = () => {
             {/* Form */}
             <View style={styles.form}>
                 <View style={styles.containerForm}>
+                    {/* Fullname */}
+                    <Controller
+                        control={control}
+                        rules={{
+                            required: "Full name is required",
+                            minLength: {
+                                value: 2,
+                                message: "Full name must be at least 2 characters",
+                            },
+                        }}
+                        render={({ field: { onChange, onBlur, value } }) => (
+                            <View>
+                                <Text style={blockStyles.label}>Full Name</Text>
+                                <TextInput
+                                    placeholder="Full Name"
+                                    onBlur={onBlur}
+                                    onChangeText={onChange}
+                                    value={value}
+                                    style={[blockStyles.input, { height: 45 }]}
+                                />
+                                {errors.fullname && (
+                                    <Text style={{ color: "red", fontSize: 12, marginTop: 5 }}>{errors.fullname.message}</Text>
+                                )}
+                            </View>
+                        )}
+                        name="fullname"
+                    />
+
+                    {/* Password */}
                     <Controller
                         control={control}
                         rules={{
@@ -105,6 +143,7 @@ const RegisterAccount = () => {
                         name="password"
                     />
 
+                    {/* Confirm Password */}
                     <Controller
                         control={control}
                         rules={{
@@ -160,7 +199,7 @@ const RegisterAccount = () => {
     )
 }
 
-export default RegisterAccount
+export default RegisterAccountScreen
 
 const styles = StyleSheet.create({
     main: {

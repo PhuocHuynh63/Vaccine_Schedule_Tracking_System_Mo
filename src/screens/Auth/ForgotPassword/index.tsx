@@ -32,7 +32,6 @@ const ForgotPasswordScreen = () => {
     const emailValue = watch('email')
     const onSubmit = (data: any) => {
         navigation.navigate(ROUTES.OTP, { email: data.email })
-        console.log(data);
         reset()
     }
     //#endregion

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { Animated, StyleSheet, Text, TouchableOpacity, View, FlatList, Modal } from 'react-native';
+import { Animated, StyleSheet, Text, TouchableOpacity, View, FlatList, ActivityIndicator, Modal } from 'react-native';
 import { style } from '@themes/index';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Entypo from '@expo/vector-icons/Entypo';
@@ -17,8 +17,9 @@ import { ROUTES } from '@routes/index';
 import { Button } from '@atoms/Button';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CalendarPicker from 'react-native-calendar-picker';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import CartService from '@services/cart/index'; // Thay bằng đường dẫn thực tế
 import SelectedVaccineCard from '@molecules/SelectedVaccineCard';
+import { AsyncStorageService } from '@services/asyncStorage';
 
 const VaccinationInfoBox = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -26,15 +27,33 @@ const VaccinationInfoBox = () => {
   const { userId: user } = route.params || {};
   const insets = useSafeAreaInsets();
 
+
   const [showDetail, setShowDetail] = useState(false);
   const heightAnim = useRef(new Animated.Value(0)).current;
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedVaccines, setSelectedVaccines] = useState<any[]>([]);
   const [calendarModalVisible, setCalendarModalVisible] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Calculate total price from selected vaccines
   const totalPrice = selectedVaccines.reduce((sum, vaccine) => sum + (vaccine.price || 0), 0);
+
+  const [userId, setUserId] = useState('');
+  console.log(userId);
+
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const storedUserId = await AsyncStorageService.getUserId('userId');
+        setUserId(storedUserId ?? '');
+      } catch (error) {
+        console.error('Error fetching user ID:', error);
+      }
+    };
+    fetchUserId();
+  }, [userId]);
 
   useEffect(() => {
     Animated.timing(heightAnim, {
@@ -45,33 +64,54 @@ const VaccinationInfoBox = () => {
   }, [showDetail]);
 
   useEffect(() => {
-    const fetchSelectedVaccines = async () => {
-      try {
-        const storedVaccines = await AsyncStorage.getItem('confirmedVaccines');
-        if (storedVaccines) {
-          setSelectedVaccines(JSON.parse(storedVaccines));
+    const fetchCart = async () => {
+      if (userId) {
+        try {
+          const response = await CartService.getCartByUserId(userId, false);
+          console.log('Cart Response:', response.data);
+          console.log('Cart>>>>>>>>>>: ', response.data.data.vaccine);
+
+          if (response.data && response.data.data.vaccine) {
+            const mappedVaccines = response.data?.data?.vaccine?.map((vaccine) => ({
+              _id: vaccine._id,
+              name: vaccine.name,
+              diseasePrevention: vaccine.diseasePrevention,
+              price: vaccine.price,
+              img: vaccine.img,
+            }));
+            setSelectedVaccines(mappedVaccines);
+          } else {
+            setSelectedVaccines([]);
+          }
+        } catch (err) {
+          console.error('Error fetching cart:', err);
+          setError('Failed to load cart');
+          setSelectedVaccines([]);
+        } finally {
+          setLoading(false);
         }
-      } catch (error) {
-        console.error('Error fetching selected vaccines:', error);
       }
     };
-    fetchSelectedVaccines();
-  }, []);
+    fetchCart();
+  }, [userId]); // Change dependency to `userId`
 
   const handleDeleteVaccine = async (vaccineId: string) => {
+    // Logic xóa vaccine khỏi giỏ hàng cần gọi API để cập nhật server
     try {
-      const updatedVaccines = selectedVaccines.filter(vaccine => vaccine.id !== vaccineId);
-      setSelectedVaccines(updatedVaccines);
-      await AsyncStorage.setItem('confirmedVaccines', JSON.stringify(updatedVaccines));
-
-      const storedSelected = await AsyncStorage.getItem('selectedVaccines');
-      if (storedSelected) {
-        const selectedVaccinesList = JSON.parse(storedSelected);
-        const updatedSelectedVaccines = selectedVaccinesList.filter((id: string) => id !== vaccineId.toString());
-        await AsyncStorage.setItem('selectedVaccines', JSON.stringify(updatedSelectedVaccines));
+      // Lấy giỏ hàng hiện tại
+      const response = await CartService.getCartByUserId(user, false);
+      const currentCart = response.data;
+      if (currentCart && currentCart.vaccine) {
+        const updatedVaccines = currentCart.vaccine.filter((v) => v._id.toString() !== vaccineId);
+        const createCartDto = {
+          user,
+          vaccine: updatedVaccines.map((v) => v._id.toString()),
+        };
+        await CartService.createCart(user, createCartDto.vaccine); // Cập nhật giỏ hàng
+        setSelectedVaccines(updatedVaccines);
       }
-    } catch (error) {
-      console.error('Error updating AsyncStorage after deletion:', error);
+    } catch (err) {
+      console.error('Error updating cart after deletion:', err);
     }
   };
 
@@ -84,9 +124,7 @@ const VaccinationInfoBox = () => {
     setCalendarModalVisible(false);
   }, []);
 
-  // Inside VaccinationInfoBox component
   const handleConfirmPayment = () => {
-    // Navigate to Cart page with relevant data
     navigation.navigate(ROUTES.CART, {
       userId: user,
       selectedVaccines: selectedVaccines,
@@ -100,6 +138,22 @@ const VaccinationInfoBox = () => {
       },
     });
   };
+
+  if (loading) {
+    return (
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color="#0056b3" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.centerContainer}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -190,7 +244,6 @@ const VaccinationInfoBox = () => {
               <FontAwesome name="calendar" size={18} color="black" />
             </SelectVaccinationSite>
 
-            {/* Modal Calendar thay thế cho calendar thông thường */}
             <Modal
               transparent={true}
               visible={calendarModalVisible}
@@ -211,22 +264,16 @@ const VaccinationInfoBox = () => {
                     selectedDayTextColor="#FFFFFF"
                     todayBackgroundColor={style.colors.red.bg}
                     todayTextStyle={{ color: '#FFFFFF' }}
-                    minDate={new Date(2024, 0, 1)} // January 1, 2024
-                    maxDate={new Date(2026, 11, 31)} // December 31, 2026
+                    minDate={new Date(2024, 0, 1)}
+                    maxDate={new Date(2026, 11, 31)}
                     previousComponent={<FontAwesome name="chevron-left" size={18} color={style.colors.blue.bg} />}
                     nextComponent={<FontAwesome name="chevron-right" size={18} color={style.colors.blue.bg} />}
-                    textStyle={{
-                      fontSize: 16,
-                      color: '#000000',
-                    }}
-                    selectedStartDate={selectedDate} // Highlight the selected date
-                    width={300} // Đảm bảo calendar hiển thị đủ rộng
+                    textStyle={{ fontSize: 16, color: '#000000' }}
+                    selectedStartDate={selectedDate}
+                    width={300}
                   />
                   <View style={styles.modalFooter}>
-                    <TouchableOpacity
-                      style={styles.modalButton}
-                      onPress={() => setCalendarModalVisible(false)}
-                    >
+                    <TouchableOpacity style={styles.modalButton} onPress={() => setCalendarModalVisible(false)}>
                       <Text style={styles.modalButtonText}>Cancel</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -256,19 +303,19 @@ const VaccinationInfoBox = () => {
             ) : (
               <FlatList
                 data={selectedVaccines}
-                keyExtractor={(item) => item.id.toString()}
+                keyExtractor={(item) => item._id?.toString() || Math.random().toString()}
                 renderItem={({ item }) => (
                   <SelectedVaccineCard
-                    vaccineName={item.name}
-                    vaccineType={item.diseasePrevention}
-                    price={item.price}
-                    onDelete={() => handleDeleteVaccine(item.id)}
+                    vaccineName={item.name || 'Unknown Vaccine'}
+                    vaccineType={item.diseasePrevention || 'Unknown Disease'}
+                    price={item.price || 0}
+                    onDelete={() => handleDeleteVaccine(item._id?.toString() || '')}
+                    imageSource={{ uri: item.img || 'https://via.placeholder.com/50' }}
                   />
                 )}
-                contentContainerStyle={{ paddingVertical: 10 }}
-                style={{ maxHeight: 200 }}  // Thêm chiều cao tối đa
-                showsVerticalScrollIndicator={true}  // Hiển thị thanh cuộn dọc
-                nestedScrollEnabled={true}  // Cho phép cuộn lồng nhau
+                ListEmptyComponent={
+                  <Text style={styles.textCartEmpty}>No valid vaccine data to display</Text>
+                }
               />
             )}
           </View>
@@ -283,7 +330,7 @@ const VaccinationInfoBox = () => {
             </Button>
 
             <Button
-              onPress={() => navigation.navigate(ROUTES.ADD_NEW_VACCINE, { userId: user })}
+              onPress={() => navigation.navigate(ROUTES.ADD_NEW_VACCINE, { userId: userId })}
               style={[styles.buttonaction, blockStyles.oppositeBlock]}
             >
               <Text style={[fontStyles.fontButton, fontStyles.oppositeFont]}>Add new vaccine</Text>
@@ -296,7 +343,6 @@ const VaccinationInfoBox = () => {
         </View>
       </View>
 
-      {/* Payment summary card - added as requested */}
       <View style={styles.paymentSummaryContainer}>
         <View style={styles.paymentSummaryContent}>
           <View style={styles.totalPriceContainer}>
@@ -516,5 +562,16 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: style.fonts.size.large,
     fontWeight: '600',
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'white',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 16,
+    textAlign: 'center',
   },
 });

@@ -14,6 +14,7 @@ import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Entypo from '@expo/vector-icons/Entypo';
 import UserService from '@services/user'
 import { SercuseService } from '@services/sercuseService'
+import { AsyncStorageService } from '@services/asyncStorage'
 
 const PasswordScreen = () => {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>()
@@ -42,12 +43,11 @@ const PasswordScreen = () => {
 
     const passwordValue = watch('password')
     const onSubmit = async (data: any) => {
-        const res = await UserService.login(data)
-
+        const res = await UserService.login(data);
         if (res.data.statusCode === 201) {
             const token = res.data.data.access_token
             await SercuseService.set('accessToken', token)
-            console.log('🔐 Here\'s your value 🔐 \n' + token);
+            await AsyncStorageService.setUserId('userId', res.data.data.user._id)
 
             navigation.navigate(ROUTES.HOME_PAGE)
         }

@@ -18,23 +18,13 @@ import OTPScreen from '@screens/Auth/OTP';
 import SelectFromCart from '@screens/SelectFromCart'
 import BottomTabNavigator from './bottomTab.navigation';
 import BottomTabNavigatorAdmin from '@screens/AdminScreen/bottomTabAdmin';
+import RegisterAccountScreen from '@screens/Auth/RegisterAccount';
 
 const Stack = createStackNavigator();
 
 const StackNavigation = () => {
     return (
         <Stack.Navigator>
-            <Stack.Screen
-                name={ROUTES.LIST_VACCINATOR_PROFILE}
-                component={ListVaccinatorProfile}
-                options={{
-                    header: () =>
-                        <HeaderBooking
-                            children={'Booking'}
-                            icon={<AntDesign name="edit" style={iconStyles.icon} />}
-                        />
-                }}
-            />
             <Stack.Screen
                 name={ROUTES.CHOOSE_AUTHEN}
                 component={ChooseAuthenScreen}
@@ -56,11 +46,16 @@ const StackNavigation = () => {
                 options={{ headerShown: false }}
             />
             <Stack.Screen
+                name={ROUTES.REGISTER_ACCOUNT}
+                component={RegisterAccountScreen}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
                 name={ROUTES.PASSWORD}
                 component={PasswordScreen}
                 options={{ headerShown: false }}
             />
-            
+
             <Stack.Screen
                 name={ROUTES.FORGOTPASSWORD}
                 component={ForgotPasswordScreen}
@@ -81,7 +76,17 @@ const StackNavigation = () => {
                         />
                 }}
             />
-            
+            <Stack.Screen
+                name={ROUTES.LIST_VACCINATOR_PROFILE}
+                component={ListVaccinatorProfile}
+                options={{
+                    header: () =>
+                        <HeaderBooking
+                            children={'Booking'}
+                            icon={<AntDesign name="edit" style={iconStyles.icon} />}
+                        />
+                }}
+            />
             <Stack.Screen
                 name={ROUTES.VACCINATOR_PROFILE}
                 component={VaccinatorProfile}
