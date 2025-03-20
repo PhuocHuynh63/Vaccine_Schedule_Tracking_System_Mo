@@ -1,6 +1,9 @@
 declare namespace MODELS {
     export interface IUser {
-        email: string;
-        password: string;
+        _id?: string;
+        email?: string;
+        password?: string;
+        fullname?: string;
+        role?: string;
     }
 }

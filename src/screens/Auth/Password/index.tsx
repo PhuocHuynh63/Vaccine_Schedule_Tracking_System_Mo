@@ -72,6 +72,24 @@ const PasswordScreen = () => {
     }
     //#endregion
 
+    const [user, setUser] = useState<MODELS.IUser>({})
+    useEffect(() => {
+        if (!route.params?.email) {
+            return
+        }
+
+        UserService.findUserByEmail(route.params?.email)
+            .then((res) => {
+                console.log(res.data.data);
+
+                setUser(res.data.data)
+            })
+            .catch((err) => {
+                console.log('Error fetching user by email:', err)
+            });
+
+    }, [route.params?.email])
+
     // #region Toggle password visibility
     const [showPassword, setShowPassword] = useState(false)
     const handleShowPassword = () => setShowPassword(!showPassword)
@@ -84,7 +102,7 @@ const PasswordScreen = () => {
                     style={{ width: 100, height: 100, borderRadius: 50 }}
                 />
                 <Text style={{ color: style.colors.white.text, fontSize: 18 }}>Welcome back!</Text>
-                <Text style={[fontStyles.fontButton, styles.titleMain]}>HUYNH MINH PHUOC</Text>
+                <Text style={[fontStyles.fontButton, styles.titleMain]}>{user.fullname?.toUpperCase()}</Text>
                 <Text style={{ color: style.colors.white.text, fontSize: 15 }}>{route.params.email}</Text>
             </View>
 

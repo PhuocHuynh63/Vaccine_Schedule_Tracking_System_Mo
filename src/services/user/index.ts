@@ -9,7 +9,10 @@ const UserService = {
     },
     async register(data: MODELS.IUser) {
         return axiosClient.post(`/auth/register`, data);
-    }
+    },
+    async findUserByEmail(email: string) {
+        return axiosClient.get(`/user/email/${email}`);
+    },
 }
 
 export default UserService;
