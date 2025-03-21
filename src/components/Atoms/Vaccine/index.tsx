@@ -1,14 +1,11 @@
 import React from 'react'
-import { StyleSheet, View } from 'react-native'
+import { Image, StyleSheet, View } from 'react-native'
 import { style } from '@themes/index';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
 
-const Vaccine = () => {
+const Vaccine = ({ img }: any) => {
     return (
         <View style={styles.container}>
-            <View style={styles.background}>
-                <FontAwesome name="user" style={styles.icon} />
-            </View>
+            <Image source={{ uri: img }} style={{ width: 46, height: 46, borderRadius: 44 }} />
         </View>
     )
 }
