@@ -1,3 +1,4 @@
+// SelectedVaccineCard component (unchanged, just for reference)
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -52,9 +53,10 @@ const SelectedVaccineCard: React.FC<SelectedVaccineCardProps> = ({
   );
 };
 
+// Styles remain the same
 const styles = StyleSheet.create({
   container: {
-    marginHorizontal: style.sizes.margin.m_12, // Điều chỉnh margin để vừa với khung
+    marginHorizontal: style.sizes.margin.m_12,
     marginVertical: style.sizes.margin.m_8,
   },
   card: {
@@ -70,13 +72,13 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flexDirection: 'row',
-    padding: style.sizes.padding.p_10, // Giảm padding để nhỏ gọn hơn
+    padding: style.sizes.padding.p_10,
     borderBottomWidth: 1,
     borderBottomColor: style.colors.grey.line,
     alignItems: 'center',
   },
   image: {
-    width: 50, // Giảm kích thước hình ảnh để vừa khung
+    width: 50,
     height: 50,
     marginRight: style.sizes.margin.m_8,
     backgroundColor: '#f5f5f5',
