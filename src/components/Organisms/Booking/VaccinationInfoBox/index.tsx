@@ -95,19 +95,21 @@ const VaccinationInfoBox = () => {
 
   const handleDeleteVaccine = async (vaccineId: string) => {
     try {
-      const response = await CartService.getCartByUserId(user, false);
-      const currentCart = response.data;
-      if (currentCart && currentCart.vaccine) {
-        const updatedVaccines = currentCart.vaccine.filter((v) => v._id.toString() !== vaccineId);
-        const createCartDto = {
-          user,
-          vaccine: updatedVaccines.map((v) => v._id.toString()),
-        };
-        await CartService.createCart(user, createCartDto.vaccine);
-        setSelectedVaccines(updatedVaccines);
+      // Ensure userId is available
+      if (!userId) {
+        throw new Error("User ID is not available");
       }
+
+      // Call removeCart with the userId and an array of vaccineIds to remove
+      await CartService.removeCart(userId, [vaccineId]);
+
+      // Update the local state to reflect the removal
+      setSelectedVaccines((prevVaccines) =>
+        prevVaccines.filter((vaccine) => vaccine._id !== vaccineId)
+      );
     } catch (err) {
-      console.error('Error updating cart after deletion:', err);
+      console.error('Error removing vaccine from cart:', err);
+      alert('Failed to remove vaccine from cart. Please try again.');
     }
   };
 

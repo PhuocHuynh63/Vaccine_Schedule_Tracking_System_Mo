@@ -38,7 +38,6 @@ const CartPage = () => {
         <View style={styles.infoRow}>
           <Text style={styles.label}>Full Name</Text>
           <Text style={styles.value}>{userInfo?.fullName || 'NGUYỄN MINH HOÀNG'}</Text>
-          <Entypo name="chevron-small-right" size={24} color={style.colors.blue.bg} />
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.label}>Date of Birth</Text>
@@ -48,12 +47,12 @@ const CartPage = () => {
           <Text style={styles.label}>Phone Number</Text>
           <Text style={styles.value}>{userInfo?.phone || '0859849026'}</Text>
         </View>
-        <View style={styles.infoRow}>
+        {/* <View style={styles.infoRow}>
           <Text style={styles.label}>Vaccination Center</Text>
           <Text style={styles.value}>
             {userInfo?.vaccinationCenter || 'VNVC Bà Thắng Hải - Ho Chi Minh City'}
           </Text>
-        </View>
+        </View> */}
         <View style={styles.infoRow}>
           <Text style={styles.label}>Preferred Vaccination Date</Text>
           <Text style={styles.value}>{userInfo?.expectedDate || '08/05/2025'}</Text>
@@ -77,34 +76,6 @@ const CartPage = () => {
         )}
       </View>
 
-      {/* Order Information (New Section) */}
-      {order && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Order Information</Text>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Order ID</Text>
-            <Text style={styles.value}>{order.id || 'N/A'}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Scheduled Date</Text>
-            <Text style={styles.value}>
-              {order.vaccines?.[0]?.nextScheduledDate
-                ? formatDate(order.vaccines[0].nextScheduledDate)
-                : 'N/A'}
-            </Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Status</Text>
-            <Text style={styles.value}>{order.vaccines?.[0]?.status || 'N/A'}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.label}>Vaccines</Text>
-            <Text style={styles.value}>
-              {order.vaccines?.map((v) => v.vaccineId).join(', ') || 'N/A'}
-            </Text>
-          </View>
-        </View>
-      )}
 
       {/* Payment Information */}
       <View style={styles.section}>
