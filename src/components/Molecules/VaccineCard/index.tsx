@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import Vaccine from '@atoms/Vaccine';
-import VaccineService from '@services/vaccine/index'; // Thay bằng đường dẫn thực tế
-
+import VaccineService from '@services/vaccine/index';
 
 interface VaccineCardProps {
   onPress: (id: string, isSelected: boolean) => void;
@@ -18,16 +17,14 @@ const VaccineCard = ({ onPress, isSelected, vaccineId }: VaccineCardProps) => {
   useEffect(() => {
     const fetchVaccine = async () => {
       try {
-        // Gọi hàm getVaccineById từ VaccineService
         const response = await VaccineService.getVaccineById(vaccineId);
-        console.log('Vaccine Response:', response.data); // Log để kiểm tra cấu trúc
+        console.log('Vaccine Response:', response.data);
 
-        // Kiểm tra và lấy dữ liệu vaccine từ response
         let vaccineData;
         if (response.data && response.data.data) {
-          vaccineData = response.data.data; // Nếu API trả về { data: { ...vaccine } }
+          vaccineData = response.data.data;
         } else if (response.data) {
-          vaccineData = response.data; // Nếu API trả về vaccine trực tiếp
+          vaccineData = response.data;
         } else {
           throw new Error('No vaccine data returned');
         }
@@ -49,8 +46,12 @@ const VaccineCard = ({ onPress, isSelected, vaccineId }: VaccineCardProps) => {
   }, [vaccineId]);
 
   const handlePress = () => {
+    // Prevent selection if the vaccine is out of stock
+    if (vaccine?.status === 'outOfStock') {
+      return;
+    }
     const newSelectedState = !isSelected;
-    onPress(vaccineId, newSelectedState); // Gọi callback mà không tự cập nhật AsyncStorage
+    onPress(vaccineId, newSelectedState);
   };
 
   if (loading) {
@@ -60,6 +61,8 @@ const VaccineCard = ({ onPress, isSelected, vaccineId }: VaccineCardProps) => {
   if (error || !vaccine) {
     return <Text style={styles.errorText}>{error || 'Error loading vaccine data'}</Text>;
   }
+
+  const isOutOfStock = vaccine.status === 'outOfStock';
 
   return (
     <View style={styles.card}>
@@ -72,13 +75,24 @@ const VaccineCard = ({ onPress, isSelected, vaccineId }: VaccineCardProps) => {
             {vaccine.diseasePrevention || 'N/A'}
           </Text>
           <Text style={styles.price}>{vaccine.price ? `${vaccine.price} VNĐ` : 'N/A'}</Text>
+          {/* Display a message if the vaccine is out of stock */}
+          {isOutOfStock && (
+            <Text style={styles.outOfStockText}>Out of Stock</Text>
+          )}
         </View>
       </View>
       <TouchableOpacity
-        style={[styles.button, isSelected ? styles.selectedButton : styles.chooseButton]}
+        style={[
+          styles.button,
+          isSelected ? styles.selectedButton : styles.chooseButton,
+          isOutOfStock && styles.disabledButton, // Apply disabled styling
+        ]}
         onPress={handlePress}
+        disabled={isOutOfStock} // Disable the button if out of stock
       >
-        <Text style={styles.buttonText}>{isSelected ? 'Selected' : 'Choose'}</Text>
+        <Text style={styles.buttonText}>
+          {isOutOfStock ? 'Unavailable' : isSelected ? 'Selected' : 'Choose'}
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -138,6 +152,9 @@ const styles = StyleSheet.create({
   selectedButton: {
     backgroundColor: '#34A853',
   },
+  disabledButton: {
+    backgroundColor: '#cccccc', // Grayed-out color for disabled state
+  },
   buttonText: {
     color: 'white',
     fontWeight: 'bold',
@@ -147,5 +164,10 @@ const styles = StyleSheet.create({
     color: 'red',
     textAlign: 'center',
     marginTop: 10,
+  },
+  outOfStockText: {
+    color: 'red',
+    fontSize: 14,
+    marginTop: 4,
   },
 });

@@ -27,7 +27,11 @@ const AddNewVaccine = () => {
         const response = await VaccineService.getAllVaccines();
         console.log('API Response:', response.data);
         if (response.data && response.data.data && Array.isArray(response.data.data.data)) {
-          setVaccines(response.data.data.data);
+          // Filter vaccines to only include those with status: "censored"
+          const filteredVaccines = response.data.data.data.filter(
+            (vaccine: any) => vaccine.status === 'censored'
+          );
+          setVaccines(filteredVaccines);
         } else {
           throw new Error('Invalid data format received from API');
         }
@@ -35,8 +39,8 @@ const AddNewVaccine = () => {
         if (storedSelected) {
           setSelectedVaccines(JSON.parse(storedSelected));
         }
-        console.log('User ID:', user); // Kiểm tra userId
-        console.log('Selected Vaccines:', selectedVaccines); // Kiểm tra selectedVaccines
+        console.log('User ID:', user);
+        console.log('Selected Vaccines:', selectedVaccines);
       } catch (err) {
         console.error('Error fetching vaccines:', err);
         setError(err.message || 'Failed to load vaccines');
@@ -58,13 +62,13 @@ const AddNewVaccine = () => {
       AsyncStorage.setItem('selectedVaccines', JSON.stringify(updatedSelected)).catch((err) =>
         console.error('Error updating AsyncStorage:', err)
       );
-      console.log('Updated Selected Vaccines:', updatedSelected); // Kiểm tra khi chọn
+      console.log('Updated Selected Vaccines:', updatedSelected);
       return updatedSelected;
     });
   };
 
   const confirmSelection = async () => {
-    console.log('Confirming with user:', user, 'selectedVaccines:', selectedVaccines); // Debug
+    console.log('Confirming with user:', user, 'selectedVaccines:', selectedVaccines);
     if (selectedVaccines.length > 0 && user) {
       try {
         const response = await CartService.createCart(user, selectedVaccines);

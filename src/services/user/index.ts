@@ -13,6 +13,9 @@ const UserService = {
     async findUserByEmail(email: string) {
         return axiosClient.get(`/user/email/${email}`);
     },
+    async findAUser(id: string){
+        return axiosClient.get(`/user/${id}`)
+    }
 }
 
 export default UserService;
