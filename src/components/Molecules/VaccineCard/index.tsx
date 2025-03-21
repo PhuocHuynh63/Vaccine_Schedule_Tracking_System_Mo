@@ -64,7 +64,7 @@ const VaccineCard = ({ onPress, isSelected, vaccineId }: VaccineCardProps) => {
   return (
     <View style={styles.card}>
       <View style={styles.infoContainer}>
-        <Vaccine />
+        <Vaccine img={vaccine.img} />
         <View style={styles.textContainer}>
           <Text style={styles.name}>{vaccine.name || 'N/A'}</Text>
           <Text style={styles.description}>
