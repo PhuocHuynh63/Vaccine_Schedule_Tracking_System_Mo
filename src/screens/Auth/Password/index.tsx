@@ -7,7 +7,7 @@ import { flexBoxStyles } from '@styles/flexBox'
 import { fontStyles } from '@styles/fonts'
 import ButtonAction from '../components/ButtonAction'
 import { style } from '@themes/index'
-import { NavigationProp, RouteProp, useNavigation, useRoute } from '@react-navigation/native'
+import { CommonActions, NavigationProp, RouteProp, StackActions, useNavigation, useRoute } from '@react-navigation/native'
 import { RootStackParamList } from 'src/types/INavigates'
 import { ROUTES } from '@routes/index'
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
@@ -52,7 +52,13 @@ const PasswordScreen = () => {
                 await SercuseService.set('accessToken', token)
                 await AsyncStorageService.setUserId('userId', res.data.data.user._id)
 
-                navigation.navigate(ROUTES.HOME_PAGE)
+                navigation.dispatch(
+                    CommonActions.reset({
+                        index: 1,
+                        routes: [{ name: ROUTES.HOME_PAGE }],
+                    })
+                )
+
                 Toast.show({
                     type: 'success',
                     text1: res.data.message,

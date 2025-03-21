@@ -34,6 +34,7 @@ type Order = {
 };
 
 type RootStackParamList = {
+    [ROUTES.SPLASH]: undefined;
     [ROUTES.CHOOSE_AUTHEN]: undefined;
     [ROUTES.SIGNIN]: { email?: string };
     [ROUTES.PASSWORD]: { email: string };
