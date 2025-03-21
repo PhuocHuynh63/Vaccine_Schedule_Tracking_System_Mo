@@ -1,8 +1,19 @@
 import React from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { Feather, FontAwesome } from "@expo/vector-icons";
+import { SercuseService } from "@services/sercuseService";
+import { useNavigation } from "@react-navigation/native";
+import { ROUTES } from "@routes/index";
 
 export default function AccountScreen() {
+  const navigation = useNavigation();
+
+
+  const handleLogout = async () => {
+    await SercuseService.remove('accessToken');
+    await SercuseService.remove('userId');
+    navigation.navigate(ROUTES.SIGNIN, { email: undefined });
+  }
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -24,7 +35,7 @@ export default function AccountScreen() {
         <MenuItem icon="edit" text="Edit Account" />
         <MenuItem icon="search" text="Look Up Bonus Points" />
         <MenuItem icon="lock" text="Change Password" />
-        <MenuItem icon="sign-out" text="Logout" />
+        <MenuItem icon="sign-out" text="Logout" onPress={handleLogout} />
       </View>
 
       {/* Version Info */}
@@ -34,8 +45,8 @@ export default function AccountScreen() {
 }
 
 // Component cho từng menu item
-const MenuItem = ({ icon, text }) => (
-  <TouchableOpacity style={styles.menuItem}>
+const MenuItem = ({ icon, text, onPress }) => (
+  <TouchableOpacity style={styles.menuItem} onPress={onPress}>
     <FontAwesome name={icon} size={18} color="#333" style={styles.menuIcon} />
     <Text style={styles.menuText}>{text}</Text>
     <Feather name="chevron-right" size={18} color="#aaa" />

@@ -19,12 +19,18 @@ import SelectFromCart from '@screens/SelectFromCart'
 import BottomTabNavigator from './bottomTab.navigation';
 import BottomTabNavigatorAdmin from '@screens/AdminScreen/bottomTabAdmin';
 import RegisterAccountScreen from '@screens/Auth/RegisterAccount';
+import SplashScreen from '@screens/Splash';
 
 const Stack = createStackNavigator();
 
 const StackNavigation = () => {
     return (
         <Stack.Navigator>
+            <Stack.Screen
+                name={ROUTES.SPLASH}
+                component={SplashScreen}
+                options={{ headerShown: false }}
+            />
             <Stack.Screen
                 name={ROUTES.CHOOSE_AUTHEN}
                 component={ChooseAuthenScreen}

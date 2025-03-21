@@ -1,4 +1,5 @@
 export enum ROUTES {
+    SPLASH = 'Splash',
     CHOOSE_AUTHEN = '/',
     SIGNIN = 'SignIn',
     PASSWORD = 'Password',
